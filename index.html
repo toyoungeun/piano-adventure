@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎹 피아노 모험</title>
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7c3aed">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    background:linear-gradient(160deg,#667eea 0%,#764ba2 50%,#f093fb 100%);
+    min-height:100vh; color:#333; user-select:none;
+  }
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 20px; color:#fff;
+  }
+  .topbar h1 { font-size:22px; text-shadow:0 2px 4px rgba(0,0,0,.25); cursor:pointer; }
+  .midi-pill {
+    background:rgba(255,255,255,.2); border:2px solid rgba(255,255,255,.5);
+    border-radius:20px; padding:6px 14px; font-size:13px; font-weight:bold;
+    color:#fff; cursor:pointer; transition:.2s;
+  }
+  .midi-pill.on { background:#2ecc71; border-color:#2ecc71; }
+  .screen { display:none; max-width:900px; margin:0 auto; padding:0 16px 40px; }
+  .screen.active { display:block; }
+
+  /* ---------- HOME ---------- */
+  .stage-block {
+    background:rgba(255,255,255,.92); border-radius:20px; padding:18px 20px;
+    margin-bottom:18px; box-shadow:0 6px 18px rgba(0,0,0,.15);
+  }
+  .stage-title { font-size:19px; font-weight:800; margin-bottom:4px; }
+  .stage-desc { font-size:13px; color:#888; margin-bottom:12px; }
+  .level-grid { display:flex; flex-wrap:wrap; gap:10px; }
+  .level-card {
+    flex:1 1 150px; min-width:150px; background:#fff; border:3px solid #eee;
+    border-radius:14px; padding:12px; cursor:pointer; transition:.15s;
+    text-align:center; position:relative;
+  }
+  .level-card:hover:not(.locked) { transform:translateY(-3px); border-color:#a78bfa; }
+  .level-card.locked { opacity:.45; cursor:not-allowed; background:#f2f2f2; }
+  .level-num { font-size:11px; color:#aaa; font-weight:bold; }
+  .level-name { font-size:15px; font-weight:800; margin:4px 0; }
+  .level-type { font-size:11px; color:#999; }
+  .level-stars { font-size:15px; margin-top:6px; letter-spacing:2px; }
+  .home-foot { text-align:center; margin-top:8px; }
+  .home-foot button {
+    background:rgba(255,255,255,.25); border:none; color:#fff; padding:8px 16px;
+    border-radius:12px; cursor:pointer; font-size:12px; margin:0 4px;
+  }
+
+  /* ---------- GAME ---------- */
+  .hud {
+    display:flex; align-items:center; gap:12px;
+    background:rgba(255,255,255,.92); border-radius:16px; padding:10px 16px;
+    margin-bottom:14px; box-shadow:0 4px 12px rgba(0,0,0,.12);
+  }
+  .hud .back { font-size:20px; cursor:pointer; border:none; background:none; }
+  .hud .lvname { font-weight:800; font-size:16px; flex:0 0 auto; }
+  .progress-wrap { flex:1; height:14px; background:#eee; border-radius:8px; overflow:hidden; }
+  .progress-bar { height:100%; width:0%; background:linear-gradient(90deg,#34d399,#10b981); transition:width .3s; border-radius:8px; }
+  .miss-count { font-size:14px; color:#e74c3c; font-weight:bold; white-space:nowrap; }
+
+  .qcard {
+    background:rgba(255,255,255,.95); border-radius:20px; padding:22px;
+    text-align:center; box-shadow:0 6px 18px rgba(0,0,0,.15); margin-bottom:14px;
+    min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .qcard.shake { animation:shake .35s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+  .big-note-name { font-size:64px; font-weight:900; color:#7c3aed; line-height:1.1; }
+  .sub-note-name { font-size:18px; color:#aaa; margin-top:4px; }
+  .q-instruction { font-size:16px; color:#666; margin-bottom:10px; }
+  .feedback { font-size:20px; font-weight:900; min-height:30px; margin-top:8px; }
+  .feedback.good { color:#10b981; }
+  .feedback.bad { color:#ef4444; }
+
+  .chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; max-width:720px; margin:10px auto 0; }
+  .chip {
+    padding:6px 10px; border-radius:10px; background:#f1f1f1; font-weight:800;
+    font-size:15px; color:#bbb; border:2px solid transparent; transition:.15s;
+  }
+  .chip.done { background:#d1fae5; color:#059669; }
+  .chip.cur { background:#ede9fe; color:#7c3aed; border-color:#a78bfa; transform:scale(1.15); }
+  .chip.rest { color:#ccc; }
+
+  /* rhythm */
+  .rhythm-row { display:flex; gap:14px; justify-content:center; align-items:flex-end; flex-wrap:wrap; margin:12px 0; }
+  .rnote { font-size:46px; color:#bbb; transition:.1s; line-height:1; }
+  .rnote.cur { color:#7c3aed; transform:scale(1.25); }
+  .rnote.hit { color:#10b981; }
+  .rnote.miss { color:#ef4444; }
+  .start-btn {
+    background:linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; border:none;
+    font-size:20px; font-weight:800; padding:14px 36px; border-radius:16px;
+    cursor:pointer; box-shadow:0 4px 12px rgba(124,58,237,.4); margin-top:10px;
+  }
+  .start-btn:active { transform:scale(.96); }
+  .timer-big { font-size:44px; font-weight:900; color:#7c3aed; }
+
+  /* quiz */
+  .quiz-opts { display:flex; flex-direction:column; gap:10px; margin-top:14px; width:100%; max-width:440px; }
+  .quiz-opts button {
+    background:#fff; border:3px solid #e5e7eb; border-radius:14px; padding:12px 16px;
+    font-size:17px; font-weight:800; cursor:pointer; color:#444; transition:.15s;
+  }
+  .quiz-opts button:hover { border-color:#a78bfa; }
+  .quiz-opts button.right { background:#d1fae5; border-color:#10b981; color:#059669; }
+  .quiz-opts button.wrongopt { background:#fee2e2; border-color:#ef4444; color:#b91c1c; opacity:.75; }
+  .qvisual { font-size:58px; margin:6px 0; color:#333; line-height:1.15; }
+  .qvisual.ts { font-weight:900; font-family:Georgia,serif; }
+  .ear-btns { display:flex; gap:14px; margin-top:14px; flex-wrap:wrap; justify-content:center; }
+  .ear-btns button {
+    border:3px solid #e5e7eb; background:#fff; border-radius:16px; padding:16px 22px;
+    font-size:18px; font-weight:800; cursor:pointer; transition:.15s;
+  }
+  .ear-btns button:hover { border-color:#a78bfa; transform:translateY(-2px); }
+  .listen-btn {
+    background:linear-gradient(135deg,#f59e0b,#f97316)!important; color:#fff; border:none!important;
+  }
+  .chip.mark { background:transparent; color:#7c3aed; font-size:22px; padding:6px 2px; }
+
+  /* keyboard */
+  .kb-outer {
+    background:rgba(255,255,255,.92); border-radius:20px; padding:16px;
+    box-shadow:0 6px 18px rgba(0,0,0,.15);
+  }
+  .kb-tools { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .kb-tools .hint-toggle {
+    background:#fef3c7; border:2px solid #fbbf24; border-radius:10px;
+    padding:5px 12px; font-size:13px; font-weight:bold; cursor:pointer; color:#b45309;
+  }
+  .kb-tools .hint-toggle.off { background:#f3f4f6; border-color:#d1d5db; color:#9ca3af; }
+  .kb-tools .kb-note { font-size:12px; color:#999; }
+  .kb { position:relative; height:170px; display:flex; }
+  .wk {
+    flex:1; background:linear-gradient(180deg,#fff 0%,#f8f8f8 100%);
+    border:1px solid #ccc; border-radius:0 0 8px 8px; position:relative; cursor:pointer;
+  }
+  .wk.pressed { background:linear-gradient(180deg,#c4b5fd,#a78bfa); }
+  .wk.hintkey { background:linear-gradient(180deg,#a7f3d0,#6ee7b7); animation:pulse 1s infinite; }
+  @keyframes pulse { 50% { filter:brightness(1.12); } }
+  .wk .klabel {
+    position:absolute; bottom:8px; left:0; right:0; text-align:center;
+    font-size:13px; font-weight:800; color:#999; pointer-events:none;
+  }
+  .wk.c4 .klabel { color:#ef4444; }
+  .bk {
+    position:absolute; top:0; height:60%; background:linear-gradient(180deg,#333,#111);
+    border-radius:0 0 6px 6px; cursor:pointer; z-index:2; border:1px solid #000;
+  }
+  .bk.pressed { background:linear-gradient(180deg,#a78bfa,#7c3aed); }
+  .bk.hintkey { background:linear-gradient(180deg,#10b981,#059669); animation:pulse 1s infinite; }
+
+  /* ---------- RESULT ---------- */
+  .result-card {
+    background:rgba(255,255,255,.95); border-radius:24px; padding:40px 30px;
+    text-align:center; box-shadow:0 8px 24px rgba(0,0,0,.2); max-width:460px;
+    margin:30px auto; position:relative; overflow:hidden;
+  }
+  .result-stars { font-size:56px; letter-spacing:6px; margin:10px 0; }
+  .result-stars .lit { animation:starpop .5s backwards; display:inline-block; }
+  .result-stars .lit:nth-child(2){ animation-delay:.25s } .result-stars .lit:nth-child(3){ animation-delay:.5s }
+  @keyframes starpop { 0%{transform:scale(0) rotate(-90deg)} 70%{transform:scale(1.4)} 100%{transform:scale(1)} }
+  .result-title { font-size:26px; font-weight:900; }
+  .result-msg { color:#888; margin:8px 0 20px; font-size:15px; }
+  .result-card button {
+    border:none; border-radius:14px; padding:12px 22px; font-size:16px; font-weight:800;
+    cursor:pointer; margin:4px;
+  }
+  .btn-next { background:linear-gradient(135deg,#10b981,#059669); color:#fff; }
+  .btn-retry { background:#ede9fe; color:#7c3aed; }
+  .btn-home { background:#f3f4f6; color:#666; }
+  .confetti { position:absolute; top:-30px; font-size:22px; animation:fall 2.6s linear forwards; pointer-events:none; }
+  @keyframes fall { to { transform:translateY(560px) rotate(720deg); opacity:0; } }
+
+  /* modal */
+  .modal-bg {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:50;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-bg.show { display:flex; }
+  .modal {
+    background:#fff; border-radius:20px; padding:28px; max-width:520px; max-height:80vh;
+    overflow-y:auto; line-height:1.7; font-size:14px;
+  }
+  .modal h2 { margin-bottom:12px; font-size:20px; }
+  .modal h3 { margin:14px 0 4px; font-size:15px; color:#7c3aed; }
+  .modal button { margin-top:16px; background:#7c3aed; color:#fff; border:none; border-radius:10px; padding:10px 20px; font-weight:bold; cursor:pointer; }
+  staff-holder { display:block; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1 onclick="goHome()">🎹 피아노 모험</h1>
+  <div style="display:flex;gap:8px;">
+    <div class="midi-pill" id="midiPill" onclick="initMidi(true)">🔌 피아노 연결하기</div>
+    <div class="midi-pill" onclick="document.getElementById('helpModal').classList.add('show')">❓ 도움말</div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen active" id="homeScreen"></div>
+
+<!-- GAME -->
+<div class="screen" id="gameScreen">
+  <div class="hud">
+    <button class="back" onclick="goHome()">🏠</button>
+    <div class="lvname" id="hudName"></div>
+    <div class="progress-wrap"><div class="progress-bar" id="hudBar"></div></div>
+    <div class="miss-count" id="hudMiss"></div>
+  </div>
+  <div class="qcard" id="qCard"></div>
+  <div class="kb-outer">
+    <div class="kb-tools">
+      <button class="hint-toggle" id="hintToggle" onclick="toggleHint()">💡 도움말 켜짐</button>
+      <span class="kb-note">피아노 건반을 눌러도 되고, 화면 건반을 눌러도 돼요</span>
+    </div>
+    <div class="kb" id="kb"></div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="resultScreen">
+  <div class="result-card" id="resultCard"></div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="modal-bg" id="helpModal">
+  <div class="modal">
+    <h2>🎹 피아노 연결 방법 (야마하 CLP-835)</h2>
+    <h3>방법 1: USB 케이블 (가장 확실해요)</h3>
+    피아노 아래쪽의 <b>[USB TO HOST]</b> 단자와 컴퓨터를 USB 케이블(B타입)로 연결한 뒤,
+    이 페이지를 <b>Chrome 브라우저</b>로 열고 위의 <b>"피아노 연결하기"</b> 버튼을 누르세요.
+    브라우저가 MIDI 사용 권한을 물어보면 <b>허용</b>을 눌러주세요.
+    <h3>방법 2: 블루투스 (Mac)</h3>
+    Mac에서 <b>오디오 MIDI 설정 앱 → 윈도우 메뉴 → 블루투스 구성 보기</b>를 열고
+    CLP-835를 연결한 다음, "피아노 연결하기" 버튼을 누르세요.
+    <h3>윈도우에서 피아노가 인식되지 않을 때</h3>
+    보통은 USB만 꽂으면 바로 인식되지만, 안 될 경우 야마하 공식 드라이버를 설치하세요:
+    <a href="https://usa.yamaha.com/support/updates/usb-midi-driver-win.html" target="_blank" style="color:#7c3aed;font-weight:bold">Yamaha USB-MIDI Driver 다운로드 (Windows 10/11)</a>
+    <h3>바탕화면에 게임 아이콘 만들기</h3>
+    Chrome으로 이 게임을 연 뒤, 주소창 오른쪽 <b>설치 아이콘(⊕ 모양)</b> 또는
+    <b>메뉴(⋮) → 전송, 저장, 공유 → 페이지를 앱으로 설치</b>를 누르면
+    바탕화면에 🎹 아이콘이 생기고 앱처럼 실행할 수 있어요.
+    <h3>연결이 안 되어도 괜찮아요</h3>
+    화면 건반을 마우스나 터치로 눌러서 모든 게임을 할 수 있어요.
+    <h3>게임 방법</h3>
+    레벨을 하나씩 깨면 다음 레벨이 열려요. 실수가 적을수록 별을 많이 받아요! ⭐⭐⭐
+    <button onclick="document.getElementById('helpModal').classList.remove('show')">닫기</button>
+  </div>
+</div>
+
+<script>
+/* ================= 기본 데이터 ================= */
+const KR = {0:'도',2:'레',4:'미',5:'파',7:'솔',9:'라',11:'시'};
+const KR_BLACK = {1:'도♯(레♭)',3:'레♯(미♭)',6:'파♯(솔♭)',8:'솔♯(라♭)',10:'라♯(시♭)'};
+const LETTER = {0:'C',2:'D',4:'E',5:'F',7:'G',9:'A',11:'B'};
+const LETTER_IDX = {0:0,2:1,4:2,5:3,7:4,9:5,11:6};
+const isBlack = m => [1,3,6,8,10].includes(m%12);
+function krName(m){ const pc=m%12; return isBlack(m)?KR_BLACK[pc]:KR[pc]; }
+function enName(m){ const pc=m%12; const oct=Math.floor(m/12)-1;
+  return (isBlack(m)?LETTER[pc-1]+'♯':LETTER[pc])+oct; }
+function krChip(m, flat){ const pc=m%12;
+  if(!isBlack(m)) return KR[pc];
+  return flat ? KR[pc+1]+'♭' : KR[pc-1]+'♯'; }
+
+/* ================= 레벨 정의 ================= */
+const SONGS = {
+  plane:  [64,62,60,62,64,64,64, 62,62,62, 64,67,67, 64,62,60,62,64,64,64,64, 62,62,64,62,60],
+  school: [67,67,69,69,67,67,64, 67,67,64,64,62, 67,67,69,69,67,67,64, 67,64,62,64,60],
+  nabi:   [67,64,64,65,62,62, 60,62,64,65,67,67,67, 67,64,64,64,65,62,62,62, 60,64,67,67,64,64,64],
+  star:   [60,60,67,67,69,69,67, 65,65,64,64,62,62,60, 67,67,65,65,64,64,62, 67,67,65,65,64,64,62, 60,60,67,67,69,69,67, 65,65,64,64,62,62,60]
+};
+const STAGES = [
+  {emoji:'🐣', name:'1단계 · 병아리', desc:'건반과 친해지기 — 계이름을 보고 건반 찾기'},
+  {emoji:'🐿️', name:'2단계 · 다람쥐', desc:'높은음자리표 음표 읽기'},
+  {emoji:'🐰', name:'3단계 · 토끼', desc:'왼손(낮은음자리표)과 리듬'},
+  {emoji:'🐯', name:'4단계 · 호랑이', desc:'동요 멜로디 연주하기'},
+  {emoji:'🦅', name:'5단계 · 독수리', desc:'화음·검은 건반·스케일 — 체르니 준비!'},
+  {emoji:'🦉', name:'6단계 · 부엉이', desc:'음자리표·옥타브·샤프플랫·박자표·빠르기말·장조와 단조'},
+  {emoji:'🎓', name:'7단계 · 마에스트로', desc:'셈여림·되돌이표·왈츠 리듬·조표 스케일·종합시험'}
+];
+const LEVELS = [
+  // 1단계
+  {stage:0, name:'도·레·미 친구들', type:'findkey', notes:[60,62,64], count:8, anyOct:true, typeName:'건반 찾기'},
+  {stage:0, name:'도레미파솔',      type:'findkey', notes:[60,62,64,65,67], count:10, anyOct:true, typeName:'건반 찾기'},
+  {stage:0, name:'한 옥타브 완성!', type:'findkey', notes:[60,62,64,65,67,69,71,72], count:12, anyOct:true, typeName:'건반 찾기'},
+  // 2단계
+  {stage:1, name:'음표 읽기: 도레미', type:'readnote', clef:'treble', notes:[60,62,64], count:8, typeName:'음표 읽기'},
+  {stage:1, name:'음표 읽기: 도~솔',  type:'readnote', clef:'treble', notes:[60,62,64,65,67], count:10, typeName:'음표 읽기'},
+  {stage:1, name:'음표 읽기: 한 옥타브', type:'readnote', clef:'treble', notes:[60,62,64,65,67,69,71,72], count:12, typeName:'음표 읽기'},
+  // 3단계
+  {stage:2, name:'왼손 자리: 낮은 도~파', type:'readnote', clef:'bass', notes:[48,50,52,53], count:8, typeName:'음표 읽기'},
+  {stage:2, name:'왼손 한 옥타브', type:'readnote', clef:'bass', notes:[48,50,52,53,55,57,59,60], count:12, typeName:'음표 읽기'},
+  {stage:2, name:'리듬: 4분·2분음표', type:'rhythm', bpm:70, rounds:2,
+    patterns:[[1,1,1,1,2,2],[1,1,2,1,1,2],[2,1,1,1,1,2]], typeName:'리듬 게임'},
+  {stage:2, name:'리듬: 8분음표 등장!', type:'rhythm', bpm:80, rounds:2,
+    patterns:[[1,0.5,0.5,1,1,2],[0.5,0.5,1,0.5,0.5,1,2],[1,1,0.5,0.5,0.5,0.5,2]], typeName:'리듬 게임'},
+  // 4단계
+  {stage:3, name:'비행기 ✈️', type:'melody', song:'plane', typeName:'멜로디 연주'},
+  {stage:3, name:'학교종 🔔', type:'melody', song:'school', typeName:'멜로디 연주'},
+  {stage:3, name:'나비야 🦋', type:'melody', song:'nabi', typeName:'멜로디 연주'},
+  {stage:3, name:'반짝반짝 작은별 ⭐', type:'melody', song:'star', typeName:'멜로디 연주'},
+  // 5단계
+  {stage:4, name:'화음: 두 음 함께!', type:'chord', count:8,
+    pairs:[[60,64],[62,65],[64,67],[65,69],[67,71],[60,67],[62,67],[64,72]], typeName:'화음'},
+  {stage:4, name:'검은 건반 탐험', type:'findkey', notes:[61,63,66,68,70], count:10, anyOct:true, typeName:'건반 찾기'},
+  {stage:4, name:'다장조 스케일', type:'scale', t3:20, t2:35, typeName:'스케일',
+    seq:[60,62,64,65,67,69,71,72,71,69,67,65,64,62,60]},
+  {stage:4, name:'스케일 스피드 도전!', type:'scale', t3:10, t2:18, typeName:'스케일',
+    seq:[60,62,64,65,67,69,71,72,71,69,67,65,64,62,60]},
+  // 6단계
+  {stage:5, name:'음자리표 구분하기', type:'quiz', pool:'clef', count:8, typeName:'기호 퀴즈'},
+  {stage:5, name:'옥타브 탐험: 어느 도일까?', type:'readnote', clef:'auto', count:12, typeName:'음표 읽기',
+    notes:[48,52,55,60,64,67,72,76]},
+  {stage:5, name:'샤프·플랫 음표 읽기', type:'readnote', clef:'treble', count:10, typeName:'음표 읽기',
+    notes:[61,63,66,68,70], mixedAcc:true},
+  {stage:5, name:'박자표 퀴즈: 4/4? 3/4?', type:'quiz', pool:'timesig', count:8, typeName:'기호 퀴즈'},
+  {stage:5, name:'빠르기말: 라르고~프레스토', type:'quiz', pool:'tempo', count:8, typeName:'기호 퀴즈'},
+  {stage:5, name:'장조? 단조? 귀로 맞히기', type:'earquiz', count:10, typeName:'듣기 퀴즈'},
+  // 7단계
+  {stage:6, name:'셈여림·기호 박사', type:'quiz', pool:'symbol', count:10, typeName:'기호 퀴즈'},
+  {stage:6, name:'왈츠 리듬 3/4 🥁', type:'rhythm', bpm:80, meter:3, rounds:2, typeName:'리듬 게임',
+    patterns:[[1,1,1,1,1,1],[2,1,1,1,1],[1,1,1,2,1],[2,1,2,1]]},
+  {stage:6, name:'되돌이표: 작은별 완전판 🔁', type:'melody', typeName:'멜로디 연주',
+    tokens:[60,60,67,67,69,69,67,65,65,64,64,62,62,60,'𝄆',67,67,65,65,64,64,62,'𝄇',60,60,67,67,69,69,67,65,65,64,64,62,62,60]},
+  {stage:6, name:'사장조 스케일 (파♯)', type:'scale', t3:22, t2:38, typeName:'스케일',
+    seq:[55,57,59,60,62,64,66,67,66,64,62,60,59,57,55], note:'사장조(G장조)는 조표가 파♯! 파 대신 파♯(검은 건반)을 쳐요'},
+  {stage:6, name:'바장조 스케일 (시♭)', type:'scale', t3:22, t2:38, flat:true, typeName:'스케일',
+    seq:[53,55,57,58,60,62,64,65,64,62,60,58,57,55,53], note:'바장조(F장조)는 조표가 시♭! 시 대신 시♭(검은 건반)을 쳐요'},
+  {stage:6, name:'🎓 마에스트로 종합시험', type:'quiz', pool:'all', count:12, typeName:'종합 퀴즈'}
+];
+
+/* ================= 퀴즈 문제은행 (opts[0]이 정답, 표시할 때 섞음) ================= */
+const QUIZ_POOLS = {
+  clef: [
+    {q:'이 음자리표의 이름은 무엇일까요?', v:()=>staffSVG('treble',[]), opts:['높은음자리표','낮은음자리표'],
+     exp:'솔(G) 자리를 감아서 그려요. 높은음자리표(솔음자리표)!'},
+    {q:'이 음자리표의 이름은 무엇일까요?', v:()=>staffSVG('bass',[]), opts:['낮은음자리표','높은음자리표'],
+     exp:'파(F) 자리에서 시작해요. 낮은음자리표(바음자리표)!'},
+    {q:'오른손이 주로 연주하는 높은 음들은 어떤 음자리표에 그릴까요?', opts:['높은음자리표','낮은음자리표'],
+     exp:'높은 음 = 높은음자리표 = 주로 오른손!'},
+    {q:'왼손이 주로 연주하는 낮은 음들은 어떤 음자리표에 그릴까요?', opts:['낮은음자리표','높은음자리표'],
+     exp:'낮은 음 = 낮은음자리표 = 주로 왼손!'},
+    {q:'이 음표는 가운데 도보다 높을까요, 낮을까요?', v:()=>staffSVG('bass',[52]), opts:['낮아요','높아요'],
+     exp:'낮은음자리표의 음은 가운데 도보다 낮은 음이에요'}
+  ],
+  timesig: [
+    {q:'이 박자표의 한 마디에는 4분음표(♩)가 몇 개 들어갈까요?', v:'<div class="qvisual ts">4<br>4</div>', opts:['4개','3개','2개'],
+     exp:'4/4박자: 한 마디에 4분음표 4개! 쿵 짝 쿵 짝'},
+    {q:'이 박자표의 한 마디에는 4분음표(♩)가 몇 개 들어갈까요?', v:'<div class="qvisual ts">3<br>4</div>', opts:['3개','4개','2개'],
+     exp:'3/4박자: 쿵 짝 짝! 왈츠의 박자예요'},
+    {q:'이 박자표의 한 마디에는 4분음표(♩)가 몇 개 들어갈까요?', v:'<div class="qvisual ts">2<br>4</div>', opts:['2개','3개','4개'],
+     exp:'2/4박자: 쿵 짝! 행진곡처럼 씩씩해요'},
+    {q:'왈츠처럼 "쿵 짝 짝" 도는 춤곡에 어울리는 박자표는?', opts:['3/4','4/4','2/4'],
+     exp:'왈츠는 3박자! 쿵-짝-짝'},
+    {q:'이 박자표의 한 마디에는 8분음표(♪)가 몇 개 들어갈까요?', v:'<div class="qvisual ts">6<br>8</div>', opts:['6개','8개','4개'],
+     exp:'6/8박자: 8분음표가 6개! 둥실둥실 흔들리는 느낌'},
+    {q:'박자표에서 아래 숫자 4는 무엇을 뜻할까요?', v:'<div class="qvisual ts">4<br>4</div>', opts:['4분음표가 한 박','음표가 4개','4번 반복'],
+     exp:'아래 4 = 4분음표(♩)를 한 박으로 세요'}
+  ],
+  tempo: [
+    {q:'라르고(Largo)는 어떻게 연주하라는 뜻일까요?', v:'<div class="qvisual" style="font-size:34px">🐢 Largo</div>', opts:['아주 느리게','아주 빠르게','보통 빠르기로'],
+     exp:'라르고 = 아주 느리고 폭넓게, 거북이처럼!'},
+    {q:'안단테(Andante)는 어떻게 연주하라는 뜻일까요?', v:'<div class="qvisual" style="font-size:34px">🚶 Andante</div>', opts:['느리게 걷는 빠르기로','아주 빠르게','점점 세게'],
+     exp:'안단테 = 천천히 걷는 빠르기로!'},
+    {q:'모데라토(Moderato)는 어떻게 연주하라는 뜻일까요?', v:'<div class="qvisual" style="font-size:34px">🙂 Moderato</div>', opts:['보통 빠르기로','아주 느리게','점점 여리게'],
+     exp:'모데라토 = 보통 빠르기로!'},
+    {q:'알레그로(Allegro)는 어떻게 연주하라는 뜻일까요?', v:'<div class="qvisual" style="font-size:34px">🏃 Allegro</div>', opts:['빠르고 경쾌하게','느리고 무겁게','음을 길게 늘여서'],
+     exp:'알레그로 = 빠르고 신나게!'},
+    {q:'프레스토(Presto)는 어떻게 연주하라는 뜻일까요?', v:'<div class="qvisual" style="font-size:34px">🚀 Presto</div>', opts:['아주 빠르게','아주 느리게','보통 빠르기로'],
+     exp:'프레스토 = 로켓처럼 아주 빠르게!'},
+    {q:'다음 중 가장 느린 빠르기말은?', opts:['라르고','알레그로','프레스토'],
+     exp:'라르고 🐢 < 안단테 🚶 < 모데라토 🙂 < 알레그로 🏃 < 프레스토 🚀'},
+    {q:'다음 중 가장 빠른 빠르기말은?', opts:['프레스토','안단테','라르고'],
+     exp:'프레스토가 제일 빨라요! 🚀'}
+  ],
+  symbol: [
+    {q:'피아노(p)는 어떻게 연주하라는 뜻일까요?', v:'<div class="qvisual" style="font-style:italic;font-family:Georgia,serif">p</div>', opts:['여리게','세게','빠르게'],
+     exp:'p(피아노) = 여리게, 속삭이듯이'},
+    {q:'포르테(f)는 어떻게 연주하라는 뜻일까요?', v:'<div class="qvisual" style="font-style:italic;font-family:Georgia,serif">f</div>', opts:['세게','여리게','느리게'],
+     exp:'f(포르테) = 세게, 힘차게!'},
+    {q:'메조포르테(mf)는 어떻게 연주하라는 뜻일까요?', v:'<div class="qvisual" style="font-style:italic;font-family:Georgia,serif">mf</div>', opts:['조금 세게','아주 여리게','아주 빠르게'],
+     exp:'mf = 조금 세게 (f보다 살짝 여리게)'},
+    {q:'크레셴도는 어떻게 연주하라는 뜻일까요?', v:'<div class="qvisual" style="letter-spacing:-6px">&lt;</div>', opts:['점점 세게','점점 여리게','점점 느리게'],
+     exp:'크레셴도(<) = 점점 세게!'},
+    {q:'데크레셴도는 어떻게 연주하라는 뜻일까요?', v:'<div class="qvisual" style="letter-spacing:-6px">&gt;</div>', opts:['점점 여리게','점점 세게','반복해서'],
+     exp:'데크레셴도(>) = 점점 여리게~'},
+    {q:'되돌이표를 만나면 어떻게 해야 할까요?', v:'<div class="qvisual">𝄆 ♩♩♩ 𝄇</div>', opts:['표시된 부분을 한 번 더 연주해요','연주를 멈춰요','그 부분을 건너뛰어요'],
+     exp:'되돌이표(𝄆 𝄇) 사이는 두 번 연주!'},
+    {q:'늘임표(페르마타)는 무슨 뜻일까요?', v:'<div class="qvisual">𝄐</div>', opts:['음을 충분히 길게 늘여요','짧게 끊어서 쳐요','쉬어요'],
+     exp:'페르마타 = 음을 기~일게 늘여요'},
+    {q:'샤프(♯)는 무슨 뜻일까요?', v:'<div class="qvisual">♯</div>', opts:['반음 올려요','반음 내려요','원래 음으로 돌아가요'],
+     exp:'♯ = 반음 위로! 바로 오른쪽 검은 건반'},
+    {q:'플랫(♭)은 무슨 뜻일까요?', v:'<div class="qvisual">♭</div>', opts:['반음 내려요','반음 올려요','두 번 반복해요'],
+     exp:'♭ = 반음 아래로! 바로 왼쪽 검은 건반'},
+    {q:'제자리표(♮)는 무슨 뜻일까요?', v:'<div class="qvisual">♮</div>', opts:['원래 음으로 되돌려요','반음 올려요','반음 내려요'],
+     exp:'♮ = ♯·♭을 취소하고 원래 음으로!'},
+    {q:'장조와 단조, 느낌이 어떻게 다를까요?', opts:['장조는 밝고, 단조는 슬퍼요','장조는 느리고, 단조는 빨라요','장조는 크고, 단조는 작아요'],
+     exp:'장조 🌞 밝고 신나요 / 단조 🌙 슬프고 차분해요'}
+  ]
+};
+QUIZ_POOLS.all = [...QUIZ_POOLS.clef, ...QUIZ_POOLS.timesig, ...QUIZ_POOLS.tempo, ...QUIZ_POOLS.symbol];
+
+/* ================= 진행 저장 ================= */
+let progress = {};
+try { progress = JSON.parse(localStorage.getItem('pianoAdv')||'{}'); } catch(e){}
+function saveProgress(){ try{ localStorage.setItem('pianoAdv', JSON.stringify(progress)); }catch(e){} }
+function unlocked(i){ return i===0 || (progress[i-1]||0) >= 1; }
+
+/* ================= 오디오 ================= */
+let AC=null;
+function ac(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended')AC.resume(); return AC; }
+function playNote(m, dur=0.8, vol=0.25){
+  const c=ac(), t=c.currentTime, f=440*Math.pow(2,(m-69)/12);
+  [[f,'triangle',vol],[f*2,'sine',vol*0.3]].forEach(([fr,ty,v])=>{
+    const o=c.createOscillator(), g=c.createGain();
+    o.type=ty; o.frequency.value=fr;
+    g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur);
+  });
+}
+function sfxGood(){ playNote(84,.25,.15); setTimeout(()=>playNote(88,.3,.15),90); }
+function sfxBad(){ const c=ac(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();
+  o.type='square'; o.frequency.value=140; g.gain.setValueAtTime(.12,t);
+  g.gain.exponentialRampToValueAtTime(.001,t+.25); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.25); }
+function sfxFanfare(){ [72,76,79,84].forEach((n,i)=>setTimeout(()=>playNote(n,.5,.2), i*130)); }
+function clickSound(at, accent){ const c=ac(),o=c.createOscillator(),g=c.createGain();
+  o.type='sine'; o.frequency.value=accent?1400:900; g.gain.setValueAtTime(.25,at);
+  g.gain.exponentialRampToValueAtTime(.001,at+.06); o.connect(g).connect(c.destination); o.start(at); o.stop(at+.07); }
+
+/* ================= MIDI ================= */
+let midiOn=false;
+function initMidi(byClick){
+  if(!navigator.requestMIDIAccess){ if(byClick) alert('이 브라우저는 MIDI를 지원하지 않아요. Chrome 브라우저로 열어주세요!'); return; }
+  navigator.requestMIDIAccess().then(acc=>{
+    function hook(){
+      let found=null;
+      acc.inputs.forEach(inp=>{ inp.onmidimessage=onMidiMsg; found=inp.name; });
+      midiOn=!!found;
+      const p=document.getElementById('midiPill');
+      if(found){ p.classList.add('on'); p.textContent='🎹 연결됨: '+found; }
+      else { p.classList.remove('on'); p.textContent='🔌 피아노 연결하기'; }
+    }
+    hook(); acc.onstatechange=hook;
+  }).catch(()=>{ if(byClick) alert('MIDI 연결 권한이 필요해요. 브라우저 주소창 근처의 권한 요청에서 "허용"을 눌러주세요.'); });
+}
+function onMidiMsg(ev){
+  const [st,note,vel]=ev.data;
+  const cmd=st&0xf0;
+  if(cmd===0x90 && vel>0) noteOn(note,true);
+  else if(cmd===0x80 || (cmd===0x90&&vel===0)) noteOff(note);
+}
+
+/* ================= 화면 건반 ================= */
+let kbLo=60, kbHi=72;
+const activeNotes=new Set();
+function buildKeyboard(lo,hi){
+  while(isBlack(lo))lo--; while(isBlack(hi))hi++;
+  kbLo=lo; kbHi=hi;
+  const kb=document.getElementById('kb'); kb.innerHTML='';
+  const whites=[]; for(let m=lo;m<=hi;m++) if(!isBlack(m)) whites.push(m);
+  const ww=100/whites.length;
+  whites.forEach(m=>{
+    const d=document.createElement('div'); d.className='wk'; d.dataset.m=m;
+    if(m===60) d.classList.add('c4');
+    d.innerHTML='<div class="klabel">'+KR[m%12]+(m===60?'<br>★':'')+'</div>';
+    attachPress(d,m); kb.appendChild(d);
+  });
+  for(let m=lo;m<=hi;m++){
+    if(!isBlack(m)) continue;
+    const wBefore = whites.filter(w=>w<m).length;
+    const b=document.createElement('div'); b.className='bk'; b.dataset.m=m;
+    const bw=ww*0.6;
+    b.style.width=bw+'%'; b.style.left=(wBefore*ww-bw/2)+'%';
+    attachPress(b,m); kb.appendChild(b);
+  }
+}
+function attachPress(el,m){
+  const down=e=>{ e.preventDefault(); playNote(m); noteOn(m,false); };
+  const up=()=>noteOff(m);
+  el.addEventListener('mousedown',down); el.addEventListener('mouseup',up); el.addEventListener('mouseleave',up);
+  el.addEventListener('touchstart',down,{passive:false}); el.addEventListener('touchend',up);
+}
+function keyEl(m){ return document.querySelector('[data-m="'+m+'"]'); }
+function noteOn(m,fromMidi){
+  activeNotes.add(m);
+  const el=keyEl(m); if(el) el.classList.add('pressed');
+  if(game) game.onNote(m);
+}
+function noteOff(m){ activeNotes.delete(m); const el=keyEl(m); if(el) el.classList.remove('pressed'); }
+function clearHints(){ document.querySelectorAll('.hintkey').forEach(e=>e.classList.remove('hintkey')); }
+function showHintKeys(ms){ clearHints(); if(!hintOn) return; ms.forEach(m=>{ const el=keyEl(m); if(el) el.classList.add('hintkey'); }); }
+
+let hintOn=true;
+function toggleHint(){
+  hintOn=!hintOn;
+  const b=document.getElementById('hintToggle');
+  b.textContent = hintOn ? '💡 도움말 켜짐' : '💡 도움말 꺼짐';
+  b.classList.toggle('off',!hintOn);
+  if(game && game.refreshHint) game.refreshHint(); else if(!hintOn) clearHints();
+}
+
+/* ================= 오선지 SVG ================= */
+function staffSVG(clef, midis, opts={}){
+  const W=opts.w||300, top=34, gap=16, half=gap/2, bottomY=top+4*gap;
+  const bottomDi = clef==='treble' ? 30 : 18; // E4 / G2
+  let s='<svg width="'+W+'" height="'+(bottomY+52)+'" viewBox="0 0 '+W+' '+(bottomY+52)+'" xmlns="http://www.w3.org/2000/svg">';
+  for(let i=0;i<5;i++){ const y=top+i*gap;
+    s+='<line x1="14" y1="'+y+'" x2="'+(W-10)+'" y2="'+y+'" stroke="#555" stroke-width="1.5"/>'; }
+  if(clef==='treble') s+='<text x="16" y="'+(bottomY+16)+'" font-size="64" fill="#333">𝄞</text>';
+  else s+='<text x="18" y="'+(top+2*gap+16)+'" font-size="44" fill="#333">𝄢</text>';
+  const baseX = midis.length>1 ? 110 : W*0.58;
+  const step = midis.length>1 ? (W-140)/Math.max(1,midis.length-1) : 0;
+  midis.forEach((m,idx)=>{
+    let pc=m%12, acc='';
+    if(!(pc in LETTER_IDX)){
+      if(opts.flat){ pc=pc+1; acc='♭'; } else { pc=pc-1; acc='♯'; }
+    }
+    const oct=Math.floor(m/12)-1, di=oct*7+LETTER_IDX[pc], dd=di-bottomDi;
+    const x=baseX+idx*step, y=bottomY-dd*half;
+    for(let k=-2;k>=dd;k-=2) s+='<line x1="'+(x-14)+'" y1="'+(bottomY-k*half)+'" x2="'+(x+14)+'" y2="'+(bottomY-k*half)+'" stroke="#555" stroke-width="1.5"/>';
+    for(let k=10;k<=dd;k+=2) s+='<line x1="'+(x-14)+'" y1="'+(bottomY-k*half)+'" x2="'+(x+14)+'" y2="'+(bottomY-k*half)+'" stroke="#555" stroke-width="1.5"/>';
+    if(acc) s+='<text x="'+(x-26)+'" y="'+(y+6)+'" font-size="24" fill="#333">'+acc+'</text>';
+    s+='<ellipse cx="'+x+'" cy="'+y+'" rx="9" ry="6.5" fill="#333" transform="rotate(-15 '+x+' '+y+')"/>';
+    if(dd<4) s+='<line x1="'+(x+8)+'" y1="'+y+'" x2="'+(x+8)+'" y2="'+(y-44)+'" stroke="#333" stroke-width="2"/>';
+    else s+='<line x1="'+(x-8)+'" y1="'+y+'" x2="'+(x-8)+'" y2="'+(y+44)+'" stroke="#333" stroke-width="2"/>';
+  });
+  return s+'</svg>';
+}
+
+/* ================= 게임 엔진 ================= */
+let game=null, curLevel=-1;
+const $q=()=>document.getElementById('qCard');
+function setBar(p){ document.getElementById('hudBar').style.width=(p*100)+'%'; }
+function setMiss(n){ document.getElementById('hudMiss').textContent = n>0 ? '실수 '+n : ''; }
+function shakeCard(){ const q=$q(); q.classList.remove('shake'); void q.offsetWidth; q.classList.add('shake'); }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome(){ if(game&&game.stop)game.stop(); game=null; renderHome(); showScreen('homeScreen'); }
+
+function starsByMistakes(miss, q){
+  const easy = q<=10;
+  if(miss <= (easy?1:2)) return 3;
+  if(miss <= (easy?3:5)) return 2;
+  return 1;
+}
+
+function startLevel(i){
+  if(!unlocked(i)) return;
+  curLevel=i; const L=LEVELS[i];
+  document.getElementById('hudName').textContent=(i+1)+'. '+L.name;
+  setBar(0); setMiss(0);
+  // 건반 범위
+  let notes=[];
+  if(L.notes) notes=L.notes; if(L.song) notes=SONGS[L.song]; if(L.seq) notes=L.seq;
+  if(L.tokens) notes=L.tokens.filter(t=>typeof t==='number');
+  if(L.pairs) notes=L.pairs.flat();
+  if(!notes.length) notes=[60,72];
+  buildKeyboard(Math.min(...notes), Math.max(...notes));
+  // 퀴즈형 레벨은 건반 숨김
+  const noKb = (L.type==='quiz'||L.type==='earquiz');
+  document.querySelector('.kb-outer').style.display = noKb?'none':'';
+  showScreen('gameScreen');
+  if(L.type==='findkey') game=new FindKeyGame(L);
+  else if(L.type==='readnote') game=new ReadNoteGame(L);
+  else if(L.type==='melody') game=new MelodyGame(L);
+  else if(L.type==='chord') game=new ChordGame(L);
+  else if(L.type==='scale') game=new ScaleGame(L);
+  else if(L.type==='rhythm') game=new RhythmGame(L);
+  else if(L.type==='quiz') game=new QuizGame(L);
+  else if(L.type==='earquiz') game=new EarQuizGame(L);
+  game.begin();
+}
+
+function finishLevel(stars, msg){
+  game=null; clearHints();
+  const prev=progress[curLevel]||0;
+  if(stars>prev){ progress[curLevel]=stars; saveProgress(); }
+  const card=document.getElementById('resultCard');
+  const starHtml=[1,2,3].map(k=>k<=stars?'<span class="lit">⭐</span>':'<span style="opacity:.2">⭐</span>').join('');
+  const titles={3:'완벽해요!! 🎉',2:'참 잘했어요! 👏',1:'해냈어요! 💪'};
+  const hasNext = curLevel+1 < LEVELS.length;
+  card.innerHTML =
+    '<div class="result-title">'+titles[stars]+'</div>'+
+    '<div class="result-stars">'+starHtml+'</div>'+
+    '<div class="result-msg">'+(msg||'')+'</div>'+
+    (hasNext?'<button class="btn-next" onclick="startLevel('+(curLevel+1)+')">다음 레벨 ▶</button>':'<div style="font-size:20px;margin-bottom:10px">🏆 모든 레벨 완료! 넌 진짜 피아니스트야!</div>')+
+    '<button class="btn-retry" onclick="startLevel('+curLevel+')">다시 하기 🔄</button>'+
+    '<button class="btn-home" onclick="goHome()">🏠</button>';
+  if(stars===3){ sfxFanfare();
+    for(let k=0;k<26;k++){ const c=document.createElement('div'); c.className='confetti';
+      c.textContent=['🎉','⭐','🎵','✨','🎶'][k%5];
+      c.style.left=(Math.random()*95)+'%'; c.style.animationDelay=(Math.random()*0.8)+'s';
+      card.appendChild(c); } }
+  else sfxGood();
+  showScreen('resultScreen');
+}
+
+/* ---------- 건반 찾기 ---------- */
+class FindKeyGame {
+  constructor(L){ this.L=L; this.i=0; this.miss=0; this.wrongHere=0; this.target=null; }
+  begin(){ this.next(); }
+  next(){
+    if(this.i>=this.L.count){ finishLevel(starsByMistakes(this.miss,this.L.count),'문제 '+this.L.count+'개 완료 · 실수 '+this.miss+'번'); return; }
+    this.wrongHere=0;
+    let n; do{ n=this.L.notes[Math.floor(Math.random()*this.L.notes.length)]; }while(n===this.target&&this.L.notes.length>1);
+    this.target=n;
+    $q().innerHTML='<div class="q-instruction">이 계이름의 건반을 눌러보세요!</div>'+
+      '<div class="big-note-name">'+krName(n)+'</div>'+
+      '<div class="sub-note-name">'+enName(n)+'</div><div class="feedback" id="fb"></div>';
+    setBar(this.i/this.L.count); clearHints();
+  }
+  refreshHint(){ if(this.wrongHere>=2) showHintKeys(this.hintTargets()); else clearHints(); }
+  hintTargets(){ const t=[]; for(let m=kbLo;m<=kbHi;m++) if(m%12===this.target%12) t.push(m); return t; }
+  onNote(m){
+    const ok = this.L.anyOct ? (m%12===this.target%12) : (m===this.target);
+    const fb=document.getElementById('fb');
+    if(ok){ sfxGood(); if(fb){fb.textContent='딩동댕! 🎉'; fb.className='feedback good';}
+      this.i++; setTimeout(()=>this.next(),650); }
+    else { sfxBad(); this.miss++; this.wrongHere++; setMiss(this.miss); shakeCard();
+      if(fb){fb.textContent='앗, 다시! 그건 '+krName(m)+' 이에요'; fb.className='feedback bad';}
+      if(this.wrongHere>=2) showHintKeys(this.hintTargets()); }
+  }
+  stop(){}
+}
+
+/* ---------- 음표 읽기 ---------- */
+class ReadNoteGame {
+  constructor(L){ this.L=L; this.i=0; this.miss=0; this.wrongHere=0; this.target=null; }
+  begin(){ this.next(); }
+  next(){
+    if(this.i>=this.L.count){ finishLevel(starsByMistakes(this.miss,this.L.count),'음표 '+this.L.count+'개 완료 · 실수 '+this.miss+'번'); return; }
+    this.wrongHere=0;
+    let n; do{ n=this.L.notes[Math.floor(Math.random()*this.L.notes.length)]; }while(n===this.target&&this.L.notes.length>1);
+    this.target=n;
+    const clef = this.L.clef==='auto' ? (n<60?'bass':'treble') : this.L.clef;
+    const flat = this.L.mixedAcc ? Math.random()<0.5 : !!this.L.flat;
+    const clefLabel = this.L.clef==='auto' ? '<div class="sub-note-name">'+(clef==='bass'?'낮은음자리표 (왼손 아래쪽!)':'높은음자리표')+'</div>' : '';
+    $q().innerHTML='<div class="q-instruction">이 음표는 무슨 음일까요? 건반으로 대답하세요! (음 높이까지 정확하게)</div>'+
+      staffSVG(clef,[n],{flat})+clefLabel+'<div class="feedback" id="fb"></div>';
+    setBar(this.i/this.L.count); clearHints();
+  }
+  refreshHint(){ if(this.wrongHere>=2) showHintKeys([this.target]); else clearHints(); }
+  onNote(m){
+    const fb=document.getElementById('fb');
+    if(m===this.target){ sfxGood(); if(fb){fb.textContent=krName(m)+'! 정답 🎉'; fb.className='feedback good';}
+      this.i++; setTimeout(()=>this.next(),650); }
+    else { sfxBad(); this.miss++; this.wrongHere++; setMiss(this.miss); shakeCard();
+      if(fb){ fb.className='feedback bad';
+        fb.textContent = (m%12===this.target%12) ? '계이름은 맞아요! 다른 높이의 '+krName(m)+'를 찾아봐요' : '앗, 다시!'; }
+      if(this.wrongHere>=2) showHintKeys([this.target]); }
+  }
+  stop(){}
+}
+
+/* ---------- 멜로디 (되돌이표 𝄆 𝄇 지원) ---------- */
+class MelodyGame {
+  constructor(L){
+    this.L=L; this.i=0; this.miss=0;
+    // chips: 표시용 (음표 + 되돌이표 기호), order: 실제 연주 순서(chip 인덱스)
+    const tokens = L.tokens || SONGS[L.song];
+    this.chips=[]; let rs=-1, re=-1;
+    tokens.forEach(t=>{
+      if(t==='𝄆'){ rs=this.chips.length; this.chips.push({mark:'𝄆'}); }
+      else if(t==='𝄇'){ re=this.chips.length; this.chips.push({mark:'𝄇'}); }
+      else this.chips.push({midi:t});
+    });
+    const idxs=this.chips.map((c,k)=>k).filter(k=>this.chips[k].midi!=null);
+    if(rs>=0 && re>rs){
+      const sec=idxs.filter(k=>k>rs&&k<re);
+      this.order=[...idxs.filter(k=>k<rs), ...sec, ...sec, ...idxs.filter(k=>k>re)];
+      this.repeatAt = idxs.filter(k=>k<rs).length + sec.length; // 두 번째 돌기 시작 지점
+    } else { this.order=idxs; this.repeatAt=-1; }
+  }
+  begin(){ this.render(); }
+  curNote(){ return this.chips[this.order[this.i]].midi; }
+  render(msg){
+    const n=this.curNote(), curChip=this.order[this.i];
+    const chipsHtml=this.chips.map((c,k)=>{
+      if(c.mark) return '<span class="chip mark">'+c.mark+'</span>';
+      const lastPos=this.order.lastIndexOf(k);
+      const anyAhead=this.order.some((ci,p)=>ci===k&&p>=this.i);
+      let cls='chip'+(k===curChip?' cur':(!anyAhead&&lastPos<this.i?' done':' rest'));
+      return '<span class="'+cls+'">'+krChip(c.midi,this.L.flat)+'</span>';
+    }).join('');
+    $q().innerHTML='<div class="q-instruction">순서대로 한 음씩 연주해 보세요 ('+(this.i+1)+' / '+this.order.length+')'+
+      (this.L.tokens?' — 𝄆 𝄇 되돌이표 구간은 두 번!':'')+'</div>'+
+      staffSVG('treble',[n],{flat:this.L.flat})+
+      '<div class="chips">'+chipsHtml+'</div><div class="feedback" id="fb">'+(msg||'')+'</div>';
+    const fb=document.getElementById('fb'); if(fb&&msg) fb.className='feedback good';
+    const cur=document.querySelector('.chip.cur'); if(cur) cur.scrollIntoView({block:'nearest'});
+    setBar(this.i/this.order.length);
+    showHintKeys([n]);
+  }
+  refreshHint(){ if(this.i<this.order.length) showHintKeys([this.curNote()]); }
+  onNote(m){
+    const n=this.curNote();
+    if(m===n || m%12===n%12){
+      this.i++; setBar(this.i/this.order.length);
+      if(this.i>=this.order.length){
+        const st = this.miss<=2?3:this.miss<=6?2:1;
+        finishLevel(st,'🎵 곡 완주! 실수 '+this.miss+'번'); return;
+      }
+      this.render(this.i===this.repeatAt ? '되돌이표! 한 번 더 🔁' : '');
+    } else {
+      sfxBad(); this.miss++; setMiss(this.miss); shakeCard();
+      const fb=document.getElementById('fb'); if(fb){fb.textContent='다음 음은 '+krChip(n,this.L.flat)+'!'; fb.className='feedback bad';}
+    }
+  }
+  stop(){}
+}
+
+/* ---------- 화음 ---------- */
+class ChordGame {
+  constructor(L){ this.L=L; this.i=0; this.miss=0; this.wrongHere=0; this.pair=null; this.done=false; }
+  begin(){ this.next(); }
+  next(){
+    if(this.i>=this.L.count){ finishLevel(starsByMistakes(this.miss,this.L.count),'화음 '+this.L.count+'개 완료 · 실수 '+this.miss+'번'); return; }
+    this.done=false; this.wrongHere=0;
+    this.pair=this.L.pairs[this.i % this.L.pairs.length];
+    $q().innerHTML='<div class="q-instruction">두 음을 <b>동시에</b> 눌러보세요!</div>'+
+      staffSVG('treble',this.pair,{w:200})+
+      '<div class="sub-note-name">'+this.pair.map(krName).join(' + ')+'</div><div class="feedback" id="fb"></div>';
+    setBar(this.i/this.L.count); showHintKeys(this.pair);
+  }
+  refreshHint(){ if(this.pair) showHintKeys(this.pair); }
+  onNote(m){
+    if(this.done) return;
+    if(!this.pair.includes(m)){ sfxBad(); this.miss++; this.wrongHere++; setMiss(this.miss); shakeCard(); this.recent={}; return; }
+    this.recent=this.recent||{}; this.recent[m]=performance.now();
+    const together = this.pair.every(n=>activeNotes.has(n)) ||
+      this.pair.every(n=>this.recent[n] && performance.now()-this.recent[n]<1200);
+    if(together){
+      this.done=true; sfxGood();
+      const fb=document.getElementById('fb'); if(fb){fb.textContent='아름다운 화음! 🎉'; fb.className='feedback good';}
+      this.i++; setTimeout(()=>this.next(),700);
+    }
+  }
+  stop(){}
+}
+
+/* ---------- 스케일 ---------- */
+class ScaleGame {
+  constructor(L){ this.L=L; this.i=0; this.miss=0; this.t0=null; this.raf=null; }
+  begin(){ this.render(); }
+  render(){
+    const chips=this.L.seq.map((m,k)=>
+      '<span class="chip'+(k<this.i?' done':k===this.i?' cur':' rest')+'">'+krChip(m,this.L.flat)+'</span>').join('');
+    $q().innerHTML='<div class="q-instruction">'+(this.L.note||'도→높은도→도, 스케일을 빠르고 정확하게!')+' (첫 음을 누르면 시작)</div>'+
+      '<div class="timer-big" id="timer">0.0초</div>'+
+      '<div class="chips">'+chips+'</div>'+
+      '<div class="sub-note-name">⭐⭐⭐ '+this.L.t3+'초 이내 · ⭐⭐ '+this.L.t2+'초 이내</div>';
+    setBar(this.i/this.L.seq.length);
+    showHintKeys([this.L.seq[this.i]]);
+  }
+  refreshHint(){ if(this.i<this.L.seq.length) showHintKeys([this.L.seq[this.i]]); }
+  tick(){
+    if(this.t0!=null){ const el=document.getElementById('timer');
+      if(el) el.textContent=((performance.now()-this.t0)/1000).toFixed(1)+'초'; }
+    this.raf=requestAnimationFrame(()=>this.tick());
+  }
+  onNote(m){
+    const n=this.L.seq[this.i];
+    if(m===n || m%12===n%12){
+      if(this.i===0){ this.t0=performance.now(); this.tick(); }
+      this.i++;
+      if(this.i>=this.L.seq.length){
+        cancelAnimationFrame(this.raf);
+        const sec=(performance.now()-this.t0)/1000;
+        let st = sec<=this.L.t3?3 : sec<=this.L.t2?2 : 1;
+        if(this.miss>3 && st>1) st--;
+        finishLevel(st, sec.toFixed(1)+'초 · 실수 '+this.miss+'번'); return;
+      }
+      this.render();
+    } else { sfxBad(); this.miss++; setMiss(this.miss); shakeCard(); }
+  }
+  stop(){ cancelAnimationFrame(this.raf); }
+}
+
+/* ---------- 리듬 ---------- */
+class RhythmGame {
+  constructor(L){ this.L=L; this.round=0; this.playing=false; this.results=[]; this.timers=[]; }
+  begin(){ this.showStart(); }
+  glyph(d){ return d===2?'𝅗𝅥':d===0.5?'♪':'♩'; }
+  showStart(){
+    if(this.round>=this.L.rounds){
+      const total=this.results.length, hits=this.results.filter(x=>x).length;
+      const pct=hits/total;
+      const st = pct>=0.9?3 : pct>=0.65?2 : 1;
+      finishLevel(st, '박자 맞추기 '+hits+' / '+total+' 성공!'); return;
+    }
+    this.pattern=this.L.patterns[Math.floor(Math.random()*this.L.patterns.length)];
+    const meter=this.L.meter||4, mword=meter===3?'셋':'넷';
+    $q().innerHTML='<div class="q-instruction">🥁 '+(meter===3?'<b>3/4 왈츠 박자</b>: 쿵! 짝 짝, 첫 박이 세요. ':'')+
+      '딱딱딱~ '+mword+'을 센 다음, 음표 박자에 맞춰 아무 건반이나 치세요! ('+(this.round+1)+' / '+this.L.rounds+'번째)</div>'+
+      '<div class="rhythm-row" id="rrow">'+this.pattern.map((d,i)=>'<span class="rnote" id="rn'+i+'">'+this.glyph(d)+'</span>').join('')+'</div>'+
+      '<button class="start-btn" onclick="game.play()">▶ 시작!</button><div class="feedback" id="fb"></div>';
+    setBar(this.round/this.L.rounds);
+  }
+  play(){
+    if(this.playing) return; this.playing=true;
+    const c=ac(); const beat=60/this.L.bpm; const t0=c.currentTime+0.3;
+    const meter=this.L.meter||4;
+    // 카운트인 (박자 수만큼)
+    for(let k=0;k<meter;k++) clickSound(t0+k*beat, k===0);
+    // 패턴 시작 시각
+    const start=t0+meter*beat;
+    let acc=0; this.slots=[];
+    this.pattern.forEach((d,i)=>{ this.slots.push({t:start+acc*beat, hit:false, judged:false, i}); acc+=d; });
+    const totalBeats=acc;
+    for(let k=0;k<Math.ceil(totalBeats);k++) clickSound(start+k*beat, k%meter===0);
+    this.beat=beat; this.startAt=start; this.endAt=start+totalBeats*beat+0.5;
+    const fb=document.getElementById('fb'); if(fb){fb.textContent='딱! 딱! 딱! 딱!'; fb.className='feedback good';}
+    const loop=()=>{
+      if(!this.playing) return;
+      const now=c.currentTime;
+      this.slots.forEach(s=>{
+        const el=document.getElementById('rn'+s.i); if(!el) return;
+        if(!s.judged && now>s.t+this.beat*0.45){ s.judged=true; if(!s.hit){ el.classList.add('miss'); this.results.push(false);} }
+        el.classList.toggle('cur', Math.abs(now-s.t)<this.beat*0.3 && !s.hit && !s.judged);
+      });
+      if(now>this.endAt){ this.playing=false; this.round++; setTimeout(()=>this.showStart(),900); return; }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  }
+  onNote(m){
+    if(!this.playing || !this.slots) return;
+    const now=ac().currentTime;
+    let best=null, bd=1e9;
+    this.slots.forEach(s=>{ if(!s.hit&&!s.judged){ const d=Math.abs(now-s.t); if(d<bd){bd=d;best=s;} } });
+    if(best && bd<this.beat*0.42){
+      best.hit=true; best.judged=true; this.results.push(true);
+      const el=document.getElementById('rn'+best.i); if(el){el.classList.add('hit'); el.classList.remove('cur');}
+    }
+  }
+  stop(){ this.playing=false; }
+}
+
+/* ---------- 기호 퀴즈 ---------- */
+class QuizGame {
+  constructor(L){ this.L=L; this.i=0; this.miss=0; this.locked=false; this.last=null; }
+  begin(){ this.next(); }
+  next(){
+    if(this.i>=this.L.count){ finishLevel(starsByMistakes(this.miss,this.L.count),'퀴즈 '+this.L.count+'문제 완료 · 실수 '+this.miss+'번'); return; }
+    this.locked=false;
+    const pool=QUIZ_POOLS[this.L.pool];
+    let q; do{ q=pool[Math.floor(Math.random()*pool.length)]; }while(q===this.last&&pool.length>1);
+    this.last=q; this.q=q;
+    const idx=q.opts.map((_,k)=>k).sort(()=>Math.random()-.5);
+    this.correct=idx.indexOf(0); // 문제은행에서 opts[0]이 항상 정답
+    const visual = typeof q.v==='function' ? q.v() : (q.v||'');
+    $q().innerHTML='<div class="q-instruction" style="font-size:18px;font-weight:700">'+q.q+'</div>'+visual+
+      '<div class="quiz-opts">'+idx.map((oi,k)=>'<button id="opt'+k+'" onclick="game.answer('+k+')">'+q.opts[oi]+'</button>').join('')+'</div>'+
+      '<div class="feedback" id="fb"></div>';
+    setBar(this.i/this.L.count);
+  }
+  answer(k){
+    if(this.locked) return;
+    const fb=document.getElementById('fb');
+    if(k===this.correct){
+      this.locked=true; sfxGood();
+      const b=document.getElementById('opt'+k); if(b) b.classList.add('right');
+      if(fb){ fb.textContent=this.q.exp||'정답! 🎉'; fb.className='feedback good'; }
+      this.i++; setTimeout(()=>this.next(), this.q.exp?1800:800);
+    } else {
+      sfxBad(); this.miss++; setMiss(this.miss); shakeCard();
+      const b=document.getElementById('opt'+k); if(b) b.classList.add('wrongopt');
+      if(fb){ fb.textContent='음... 다시 생각해볼까?'; fb.className='feedback bad'; }
+    }
+  }
+  onNote(){} stop(){}
+}
+
+/* ---------- 장조/단조 듣기 퀴즈 ---------- */
+class EarQuizGame {
+  constructor(L){ this.L=L; this.i=0; this.miss=0; this.locked=false; }
+  begin(){ this.next(); }
+  next(){
+    if(this.i>=this.L.count){ finishLevel(starsByMistakes(this.miss,this.L.count),'듣기 '+this.L.count+'문제 완료 · 실수 '+this.miss+'번'); return; }
+    this.locked=false;
+    this.isMajor=Math.random()<0.5;
+    this.root=53+Math.floor(Math.random()*12);
+    $q().innerHTML='<div class="q-instruction" style="font-size:18px;font-weight:700">잘 듣고 골라보세요! 밝은 소리일까요, 슬픈 소리일까요? ('+(this.i+1)+' / '+this.L.count+')</div>'+
+      '<div class="ear-btns">'+
+      '<button class="listen-btn" onclick="game.playCur()">🔊 다시 듣기</button></div>'+
+      '<div class="ear-btns">'+
+      '<button onclick="game.answer(true)">🌞 장조<br><span style="font-size:13px;color:#999">밝고 신나요</span></button>'+
+      '<button onclick="game.answer(false)">🌙 단조<br><span style="font-size:13px;color:#999">슬프고 차분해요</span></button></div>'+
+      '<div class="feedback" id="fb"></div>';
+    setBar(this.i/this.L.count);
+    setTimeout(()=>this.playCur(),400);
+  }
+  playCur(){
+    const r=this.root, third=r+(this.isMajor?4:3), fifth=r+7;
+    playNote(r,.5); setTimeout(()=>playNote(third,.5),330); setTimeout(()=>playNote(fifth,.5),660);
+    setTimeout(()=>{ [r,third,fifth].forEach(n=>playNote(n,1.3,.16)); },1050);
+  }
+  answer(maj){
+    if(this.locked) return;
+    const fb=document.getElementById('fb');
+    if(maj===this.isMajor){
+      this.locked=true; sfxGood();
+      if(fb){ fb.textContent=(this.isMajor?'맞아요, 밝은 장조! 🌞':'맞아요, 슬픈 단조! 🌙'); fb.className='feedback good'; }
+      this.i++; setTimeout(()=>this.next(),1000);
+    } else {
+      sfxBad(); this.miss++; setMiss(this.miss); shakeCard();
+      if(fb){ fb.textContent='한 번 더 들어볼까요? 🔊'; fb.className='feedback bad'; }
+      setTimeout(()=>this.playCur(),400);
+    }
+  }
+  onNote(){} stop(){}
+}
+
+/* ================= 홈 화면 ================= */
+function renderHome(){
+  const h=document.getElementById('homeScreen');
+  let html='';
+  STAGES.forEach((st,si)=>{
+    html+='<div class="stage-block"><div class="stage-title">'+st.emoji+' '+st.name+'</div>'+
+      '<div class="stage-desc">'+st.desc+'</div><div class="level-grid">';
+    LEVELS.forEach((L,i)=>{
+      if(L.stage!==si) return;
+      const stars=progress[i]||0, lock=!unlocked(i);
+      const starStr = lock ? '🔒' : (stars? '⭐'.repeat(stars)+'<span style="opacity:.2">'+'⭐'.repeat(3-stars)+'</span>' : '<span style="opacity:.25">⭐⭐⭐</span>');
+      html+='<div class="level-card'+(lock?' locked':'')+'" onclick="startLevel('+i+')">'+
+        '<div class="level-num">LEVEL '+(i+1)+'</div>'+
+        '<div class="level-name">'+L.name+'</div>'+
+        '<div class="level-type">'+L.typeName+'</div>'+
+        '<div class="level-stars">'+starStr+'</div></div>';
+    });
+    html+='</div></div>';
+  });
+  const total=LEVELS.reduce((a,_,i)=>a+(progress[i]||0),0);
+  html+='<div class="home-foot"><span style="color:#fff;font-weight:bold">모은 별: '+total+' / '+(LEVELS.length*3)+' ⭐</span><br><br>'+
+    '<button onclick="if(confirm(\'정말 기록을 지울까요?\')){progress={};saveProgress();renderHome();}">기록 초기화</button></div>';
+  h.innerHTML=html;
+}
+
+/* ================= 시작 ================= */
+renderHome();
+initMidi(false);
+window.addEventListener('pointerdown',()=>ac(),{once:true});
+</script>
+</body>
+</html>

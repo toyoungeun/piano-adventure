@@ -1,0 +1,13 @@
+{
+  "name": "피아노 모험",
+  "short_name": "피아노 모험",
+  "description": "아이를 위한 피아노 연습 게임 — 야마하 CLP-835 MIDI 연결 지원",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#7c3aed",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
