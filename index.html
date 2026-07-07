@@ -336,6 +336,46 @@
     .modal { padding:18px; font-size:13px; }
     .score-wrap { max-height:260px; }
   }
+
+  /* ---------- 음악감상 ---------- */
+  .comp-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .comp-card { flex:1 1 100px; min-width:96px; background:rgba(255,255,255,.92); border-radius:14px;
+    padding:10px 6px; cursor:pointer; text-align:center; border:3px solid transparent; transition:.15s; }
+  .comp-card:hover { transform:translateY(-2px); }
+  .comp-card.sel { border-color:#fbbf24; }
+  .comp-emoji { font-size:26px; } .comp-name { font-weight:900; font-size:13px; margin-top:3px; }
+  .comp-years { font-size:10px; color:#999; }
+  .comp-desc-box { background:rgba(255,255,255,.92); border-radius:14px; padding:12px 16px; font-size:13px;
+    color:#555; margin-bottom:12px; line-height:1.7; }
+  .lp-len { font-size:12px; color:#999; width:44px; text-align:right; flex:none; }
+  /* 감상 화면 */
+  .lp-head { background:rgba(255,255,255,.95); border-radius:18px; padding:16px 20px; margin-bottom:12px;
+    box-shadow:0 4px 14px rgba(0,0,0,.12); }
+  .lp-title { font-size:21px; font-weight:900; }
+  .lp-sub { color:#7c3aed; font-weight:700; font-size:13px; margin-top:2px; }
+  .lp-desc { color:#666; font-size:13px; margin-top:8px; line-height:1.7; }
+  .lp-controls { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.95);
+    border-radius:16px; padding:10px 14px; margin-bottom:12px; flex-wrap:wrap; }
+  .lp-btn { border:none; border-radius:12px; padding:10px 18px; font-size:16px; font-weight:900;
+    cursor:pointer; background:linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; }
+  .lp-btn.small { padding:8px 12px; font-size:13px; background:#f3f4f6; color:#555; }
+  .lp-progress { flex:1; min-width:120px; height:14px; background:#eee; border-radius:8px; cursor:pointer; position:relative; overflow:hidden; }
+  .lp-progress .fill { height:100%; width:0%; background:linear-gradient(90deg,#a78bfa,#7c3aed); border-radius:8px; }
+  .lp-time { font-size:12px; color:#888; font-weight:700; white-space:nowrap; }
+  .view-toggle { display:flex; gap:6px; }
+  .vt-btn { border:2px solid #a78bfa; background:#fff; color:#7c3aed; border-radius:10px; padding:7px 12px; font-weight:800; cursor:pointer; font-size:13px; }
+  .vt-btn.sel { background:#7c3aed; color:#fff; }
+  .lp-stage { background:rgba(255,255,255,.95); border-radius:18px; padding:14px; box-shadow:0 4px 14px rgba(0,0,0,.12); }
+  .fall-canvas { display:block; width:100%; height:300px; background:linear-gradient(180deg,#1e1b4b,#312e81); border-radius:12px; }
+  .lscore-wrap { overflow:hidden; background:#fff; border-radius:12px; height:340px; position:relative; }
+  .lscore-wrap .playhead { position:absolute; top:0; bottom:0; left:180px; width:2px; background:#ef4444; z-index:3; box-shadow:0 0 6px rgba(239,68,68,.6); }
+  .lp-out { font-size:11.5px; color:#888; }
+  @media (max-width:640px){
+    .comp-card { min-width:80px; padding:8px 4px; } .comp-name { font-size:11px; }
+    .lp-title { font-size:17px; } .lp-btn { padding:9px 14px; font-size:14px; }
+    .fall-canvas { height:240px; } .lscore-wrap { height:260px; }
+    .lscore-wrap .playhead { left:90px; }
+  }
 </style>
 </head>
 <body>
@@ -344,6 +384,7 @@
   <h1 onclick="goHome()">🎹 피아노 모험</h1>
   <div style="display:flex;gap:8px;">
     <div class="midi-pill" id="midiPill" onclick="initMidi(true)">🔌 피아노 연결하기</div>
+    <div class="midi-pill" id="sfxPill" onclick="cycleSfx()">🔉 효과음 작게</div>
     <div class="midi-pill" onclick="document.getElementById('helpModal').classList.add('show')">❓ 도움말</div>
   </div>
 </div>
@@ -355,6 +396,7 @@
 <div class="screen" id="gameScreen">
   <div class="hud">
     <button class="exit-btn" onclick="exitPlay()">◀ 나가기</button>
+    <button class="exit-btn" onclick="retryPlay()">🔄 다시</button>
     <div class="lvname" id="hudName"></div>
     <div class="progress-wrap"><div class="progress-bar" id="hudBar"></div></div>
     <div class="miss-count" id="hudMiss"></div>
@@ -373,6 +415,9 @@
 <div class="screen" id="resultScreen">
   <div class="result-card" id="resultCard"></div>
 </div>
+
+<!-- 음악감상 -->
+<div class="screen" id="listenScreen"></div>
 
 <!-- 곡 상세 -->
 <div class="screen" id="detailScreen"></div>
@@ -564,6 +609,12 @@ function unlocked(i){ return i===0 || (progress[i-1]||0) >= 1; }
 /* ================= 오디오 ================= */
 let AC=null;
 function ac(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended')AC.resume(); return AC; }
+let sfxVol=0.5;
+try{ const v=parseFloat(localStorage.getItem('pjSfx')); if(!isNaN(v)) sfxVol=v; }catch(e){}
+function updSfxPill(){ const p=document.getElementById('sfxPill');
+  if(p) p.textContent = sfxVol===0?'🔇 효과음 끔':sfxVol===1?'🔊 효과음 보통':'🔉 효과음 작게'; }
+function cycleSfx(){ sfxVol = sfxVol===0?1 : sfxVol===1?0.5 : 0;
+  try{localStorage.setItem('pjSfx',sfxVol);}catch(e){} updSfxPill(); if(sfxVol) sfxGood(); }
 let MASTER=null, NOISEBUF=null;
 function master(){
   const c=ac();
@@ -655,23 +706,28 @@ function playNote(m, dur=1.6, vol=0.3){
   src.connect(g); g.connect(master());
   src.start(t); src.stop(t+rel+0.5);
 }
-function sfxGood(){ playNote(84,.25,.15); setTimeout(()=>playNote(88,.3,.15),90); }
+function sfxGood(){ if(!sfxVol) return; playNote(84,.25,.13*sfxVol); setTimeout(()=>playNote(88,.3,.13*sfxVol),90); }
 function sfxBad(){ const c=ac(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();
-  o.type='square'; o.frequency.value=140; g.gain.setValueAtTime(.12,t);
+  if(!sfxVol) return; o.type='square'; o.frequency.value=140; g.gain.setValueAtTime(.11*sfxVol,t);
   g.gain.exponentialRampToValueAtTime(.001,t+.25); o.connect(g).connect(c.destination); o.start(t); o.stop(t+.25); }
-function sfxFanfare(){ [72,76,79,84].forEach((n,i)=>setTimeout(()=>playNote(n,.5,.2), i*130)); }
+function sfxFanfare(){ if(!sfxVol) return; [72,76,79,84].forEach((n,i)=>setTimeout(()=>playNote(n,.5,.17*sfxVol), i*130)); }
 function clickSound(at, accent){ const c=ac(),o=c.createOscillator(),g=c.createGain();
-  o.type='sine'; o.frequency.value=accent?1400:900; g.gain.setValueAtTime(.25,at);
+  o.type='sine'; o.frequency.value=accent?1400:900; g.gain.setValueAtTime(Math.max(.06,.22*sfxVol),at);
   g.gain.exponentialRampToValueAtTime(.001,at+.06); o.connect(g).connect(c.destination); o.start(at); o.stop(at+.07); }
 
 /* ================= MIDI ================= */
-let midiOn=false;
+let midiOn=false, midiOut=null;
+function pianoOn(m,vel=96){ if(midiOut){ try{ midiOut.send([0x90,m,vel]); return true; }catch(e){} } return false; }
+function pianoOff(m){ if(midiOut){ try{ midiOut.send([0x80,m,0]); }catch(e){} } }
+function pianoAllOff(){ if(midiOut){ try{ midiOut.send([0xB0,123,0]); }catch(e){} } }
 function initMidi(byClick){
   if(!navigator.requestMIDIAccess){ if(byClick) alert('이 브라우저는 MIDI를 지원하지 않아요. Chrome 브라우저로 열어주세요!'); return; }
   navigator.requestMIDIAccess().then(acc=>{
     function hook(){
       let found=null;
       acc.inputs.forEach(inp=>{ inp.onmidimessage=onMidiMsg; found=inp.name; });
+      midiOut=null;
+      acc.outputs.forEach(out=>{ if(!midiOut) midiOut=out; });
       midiOn=!!found;
       const p=document.getElementById('midiPill');
       if(found){ p.classList.add('on'); p.textContent='🎹 연결됨: '+found; }
@@ -690,11 +746,13 @@ function onMidiMsg(ev){
 /* ================= 화면 건반 ================= */
 let kbLo=60, kbHi=72;
 const activeNotes=new Set();
-function buildKeyboard(lo,hi){
+let curKbId='kb';
+function buildKeyboard(lo,hi,target){
+  curKbId=target||'kb';
   while(isBlack(lo))lo--; while(isBlack(hi))hi++;
   preloadRange(lo,hi);
   kbLo=lo; kbHi=hi;
-  const kb=document.getElementById('kb'); kb.innerHTML='';
+  const kb=document.getElementById(curKbId); kb.innerHTML='';
   const whites=[]; for(let m=lo;m<=hi;m++) if(!isBlack(m)) whites.push(m);
   kb.classList.remove('dense','xdense');
   if(whites.length>20) kb.classList.add('xdense'); else if(whites.length>13) kb.classList.add('dense');
@@ -715,12 +773,12 @@ function buildKeyboard(lo,hi){
   }
 }
 function attachPress(el,m){
-  const down=e=>{ e.preventDefault(); playNote(m); noteOn(m,false); };
-  const up=()=>noteOff(m);
+  const down=e=>{ e.preventDefault(); if(!pianoOn(m)) playNote(m); noteOn(m,false); };
+  const up=()=>{ pianoOff(m); noteOff(m); };
   el.addEventListener('mousedown',down); el.addEventListener('mouseup',up); el.addEventListener('mouseleave',up);
   el.addEventListener('touchstart',down,{passive:false}); el.addEventListener('touchend',up);
 }
-function keyEl(m){ return document.querySelector('[data-m="'+m+'"]'); }
+function keyEl(m){ return document.querySelector("#"+curKbId+' [data-m="'+m+'"]'); }
 function noteOn(m,fromMidi){
   activeNotes.add(m);
   const el=keyEl(m); if(el) el.classList.add('pressed');
@@ -777,8 +835,14 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-function goHome(){ if(game&&game.stop)game.stop(); game=null; chMode=null; stopPreview(); clearHints();
+function goHome(){ if(game&&game.stop)game.stop(); game=null; chMode=null; stopPreview(); clearHints(); if(typeof stopListen==='function') stopListen();
   document.getElementById('qCard').style.display=''; renderHome(); showScreen('homeScreen'); }
+function retryPlay(){
+  if(game&&game.stop)game.stop(); game=null; clearHints();
+  document.getElementById('qCard').style.display='';
+  if(curSong&&chMode){ const m=chMode; chMode=null; startChallenge(m); }
+  else if(curLevel>=0) startLevel(curLevel);
+}
 function exitPlay(){ if(game&&game.stop)game.stop(); game=null; clearHints();
   document.getElementById('qCard').style.display='';
   if(curSong&&chMode){ chMode=null; openSong(curSong.cat,curSong.idx); } else goHome(); }
@@ -1460,10 +1524,17 @@ function previewSong(){
   stopPreview(); if(!curSong) return;
   const ev=makeEvents(curSong), beat=60/(curSong.bpm||100);
   ev.forEach(e=>{
-    prevTimers.push(setTimeout(()=>{ e.notes.forEach(n=>playNote(n.m, Math.max(0.35, e.dur*beat*0.95), n.hand==='L'?0.16:0.22)); }, e.t*beat*1000+50));
+    prevTimers.push(setTimeout(()=>{
+      e.notes.forEach(n=>{
+        const durS=Math.max(0.35, e.dur*beat*0.95);
+        if(midiOut){ pianoOn(n.m, n.hand==='L'?72:96);
+          prevTimers.push(setTimeout(()=>pianoOff(n.m), durS*1000)); }
+        else playNote(n.m, durS, n.hand==='L'?0.16:0.22);
+      });
+    }, e.t*beat*1000+50));
   });
 }
-function stopPreview(){ prevTimers.forEach(clearTimeout); prevTimers=[]; }
+function stopPreview(){ prevTimers.forEach(clearTimeout); prevTimers=[]; pianoAllOff(); }
 function openSong(cat,i){
   stopPreview(); if(game&&game.stop){game.stop();} game=null; chMode=null;
   const s=CH[cat][i]; s.cat=cat; s.id=cat+i; s.idx=i; curSong=s;
@@ -1697,6 +1768,323 @@ class FallGame {
   stop(){ this.playing=false; cancelAnimationFrame(this.raf); this.cleanup(); }
 }
 
+
+/* ================================================================
+   음악감상 탭
+   ================================================================ */
+const LDATA=[{"id": "bach", "n": "바흐", "e": "🎼", "y": "1685–1750", "d": "「음악의 아버지」. 독일 교회의 오르가니스트로 일하며 수학처럼 정교하고 아름다운 곡을 천 곡 넘게 남겼어요. 지금도 전 세계 피아노 학생들은 바흐로 기본기를 배워요."}, {"id": "pachelbel", "n": "파헬벨", "e": "⛪", "y": "1653–1706", "d": "바흐보다 한 세대 앞선 독일의 오르가니스트. 「캐논」 단 한 곡으로 350년 넘게 전 세계 결혼식과 광고 음악을 책임지고 있어요."}, {"id": "scarlatti", "n": "스카를라티", "e": "🎸", "y": "1685–1757", "d": "바흐와 같은 해에 태어난 이탈리아 작곡가. 스페인 공주의 선생님이 되어 건반 소나타를 555곡이나 썼어요! 기타와 캐스터네츠 소리를 피아노로 흉내 낸 괴짜였죠."}, {"id": "haydn", "n": "하이든", "e": "🎩", "y": "1732–1809", "d": "「교향곡의 아버지」이자 모차르트의 절친, 베토벤의 스승. 연주자가 조는 관객을 깨우려고 갑자기 큰 소리를 넣는 등 유머가 넘치는 음악을 썼어요."}, {"id": "mozart", "n": "모차르트", "e": "🇦🇹", "y": "1756–1791", "d": "5살에 작곡을 시작해 유럽을 순회한 천재. 밝고 맑은 멜로디의 마법사예요. 35년의 짧은 생애 동안 600곡 넘게 썼어요."}, {"id": "beethoven", "n": "베토벤", "e": "🦁", "y": "1770–1827", "d": "귀가 점점 들리지 않게 되고도 최고의 명곡들을 쏟아낸 불굴의 작곡가. 사자 갈기 같은 머리처럼 음악도 뜨겁고 강렬해요."}, {"id": "schubert", "n": "슈베르트", "e": "🐟", "y": "1797–1828", "d": "「가곡의 왕」. 수줍음 많은 성격에 안경을 낀 채 잠들 만큼 작곡에 빠져 살았고, 31년 동안 1000곡 가까이 썼어요."}, {"id": "chopin", "n": "쇼팽", "e": "🎹", "y": "1810–1849", "d": "「피아노의 시인」. 폴란드에서 태어나 파리에서 활동하며 평생 거의 피아노곡만 썼어요. 피아노로 낼 수 있는 가장 아름다운 소리를 찾아낸 사람이에요."}, {"id": "schumann", "n": "슈만", "e": "💭", "y": "1810–1856", "d": "꿈과 상상의 작곡가. 「어린이 정경」은 어른이 되어 돌아본 어린 시절의 추억을 그린 13장의 음악 그림책이에요."}, {"id": "liszt", "n": "리스트", "e": "⭐", "y": "1811–1886", "d": "역사상 최고의 피아노 슈퍼스타. 연주회장에서 기절하는 팬이 나올 정도로 인기가 많았고, 여행지의 풍경을 피아노로 그린 「순례의 해」를 남겼어요."}, {"id": "brahms", "n": "브람스", "e": "🍼", "y": "1833–1897", "d": "수염이 덥수룩한 무뚝뚝한 아저씨였지만 음악은 누구보다 따뜻했어요. 오늘 밤에도 전 세계 아기들이 그의 자장가를 들으며 잠들어요."}, {"id": "tchaikovsky", "n": "차이콥스키", "e": "🩰", "y": "1840–1893", "d": "백조의 호수, 호두까기 인형을 만든 러시아 발레 음악의 왕. 「사계」는 1월부터 12월까지 열두 달을 그린 피아노 달력이에요."}, {"id": "grieg", "n": "그리그", "e": "🏔️", "y": "1843–1907", "d": "노르웨이의 국민 작곡가. 피오르(빙하 골짜기)와 트롤, 요정이 나오는 북유럽의 풍경과 전설을 음악으로 그렸어요."}, {"id": "debussy", "n": "드뷔시", "e": "🌙", "y": "1862–1918", "d": "소리로 그림을 그린 프랑스 인상주의 작곡가. 달빛, 물결, 눈송이를 피아노로 표현했고, 딸을 위해 「어린이 세계」를 작곡했어요."}, {"id": "satie", "n": "사티", "e": "🕯️", "y": "1866–1925", "d": "파리의 괴짜 천재. 똑같은 회색 양복만 12벌 사서 매일 입었대요. 짐노페디처럼 세상에서 가장 느리고 신비한 음악을 만들었어요."}, {"id": "joplin", "n": "조플린", "e": "🎩", "y": "1868–1917", "d": "「래그타임의 왕」. 재즈가 태어나기 전, 미국에서 가장 신나는 피아노 음악을 만들었어요. 엇박자 리듬이 몸을 들썩이게 해요."}];
+const LSONGS=[{"c": "bach", "t": "미뉴에트 G장조", "d": "바흐 아내 안나의 악보집에 실린 유명한 춤곡. 사실은 제자 페촐트의 곡이라는 게 250년 뒤에 밝혀졌어요!", "f": "h00.mid", "s": 103}, {"c": "bach", "t": "G선상의 아리아 (편곡)", "d": "바이올린의 가장 낮은 줄(G선) 하나로 연주할 수 있어서 붙은 이름. 세상에서 가장 평화로운 음악이에요.", "f": "h01.mid", "s": 137}, {"c": "bach", "t": "프렐류드 1번 C장조 (평균율 1권)", "d": "구노가 이 곡 위에 아베 마리아 멜로디를 얹었을 만큼 완벽한 화음의 물결.", "f": "l000.mid", "s": 121}, {"c": "pachelbel", "t": "캐논 D장조 (피아노 편곡)", "d": "8개 음의 베이스가 처음부터 끝까지 반복되는 동안 멜로디가 점점 화려해져요.", "f": "h02.mid", "s": 197}, {"c": "scarlatti", "t": "건반 소나타 (선곡 A)", "d": "뿔피리와 기타 소리를 흉내 낸 이탈리아 건반 소나타.", "f": "l001.mid", "s": 85}, {"c": "scarlatti", "t": "건반 소나타 (선곡 B)", "d": "우아한 스페인풍 건반 소나타.", "f": "l002.mid", "s": 79}, {"c": "haydn", "t": "피아노 소나타 (선곡 A) 1악장", "d": "유머 넘치는 하이든의 밝은 소나타.", "f": "l003.mid", "s": 82}, {"c": "haydn", "t": "피아노 소나타 (선곡 B) 1악장", "d": "맑고 경쾌한 고전파 소나타.", "f": "l004.mid", "s": 157}, {"c": "haydn", "t": "피아노 소나타 (선곡 C) 1악장", "d": "베토벤의 스승다운 단단한 소나타.", "f": "l005.mid", "s": 303}, {"c": "mozart", "t": "터키 행진곡", "d": "세상에서 가장 유명한 피아노 행진곡! 터키 군악대의 북소리를 흉내 냈어요.", "f": "l006.mid", "s": 185}, {"c": "mozart", "t": "소나타 16번 K.545 1악장", "d": "모차르트가 \"초보자를 위한 작은 소나타\"라 부른 곡. 피아노 어린이의 영원한 목표!", "f": "l007.mid", "s": 146}, {"c": "mozart", "t": "소나타 16번 K.545 2악장", "d": "오르골처럼 맑고 평화로운 느린 악장.", "f": "l008.mid", "s": 166}, {"c": "mozart", "t": "소나타 16번 K.545 3악장", "d": "통통 튀는 귀여운 론도 피날레.", "f": "l009.mid", "s": 79}, {"c": "mozart", "t": "소나타 8번 K.310 1악장", "d": "어머니를 잃은 해에 쓴 슬프고 격정적인 단조 소나타.", "f": "l010.mid", "s": 268}, {"c": "mozart", "t": "소나타 10번 K.330 2악장", "d": "노래하듯 아름다운 느린 악장.", "f": "l011.mid", "s": 133}, {"c": "mozart", "t": "소나타 12번 K.332 1악장", "d": "새가 지저귀다 폭풍이 몰아치는 변화무쌍한 악장.", "f": "l012.mid", "s": 286}, {"c": "mozart", "t": "소나타 14번 K.457 1악장", "d": "베토벤이 감동받아 연구한 어둡고 극적인 소나타.", "f": "l013.mid", "s": 246}, {"c": "beethoven", "t": "엘리제를 위하여 (단순화 편곡)", "d": "베토벤이 좋아하던 소녀에게 선물한 곡. \"미레#미레#\" 네 음은 세계에서 가장 유명한 네 음일 거예요.", "f": "h03.mid", "s": 125}, {"c": "beethoven", "t": "비창 소나타 1악장", "d": "무거운 화음으로 시작해 폭풍처럼 몰아치는 젊은 베토벤의 대표작.", "f": "l014.mid", "s": 327}, {"c": "beethoven", "t": "비창 소나타 2악장", "d": "광고와 영화에 수없이 나온 베토벤의 가장 따뜻한 노래.", "f": "l015.mid", "s": 220}, {"c": "beethoven", "t": "비창 소나타 3악장", "d": "굴러가듯 경쾌한 론도 피날레.", "f": "l016.mid", "s": 242}, {"c": "beethoven", "t": "월광 소나타 1악장", "d": "달빛이 호수에 비치는 듯 신비로운 곡. 별명은 시인이 붙여줬어요.", "f": "l017.mid", "s": 299}, {"c": "beethoven", "t": "월광 소나타 2악장", "d": "폭풍 사이에서 잠깐 웃어주는 귀여운 춤곡.", "f": "l018.mid", "s": 59}, {"c": "beethoven", "t": "월광 소나타 3악장", "d": "폭풍처럼 몰아치는 초절정 피날레!", "f": "l019.mid", "s": 316}, {"c": "beethoven", "t": "템페스트 소나타 3악장", "d": "쉼 없이 굴러가는 파도 같은 곡.", "f": "l020.mid", "s": 310}, {"c": "beethoven", "t": "발트슈타인 소나타 1악장", "d": "아침 해가 떠오르듯 반짝이는 대곡.", "f": "l021.mid", "s": 506}, {"c": "beethoven", "t": "열정 소나타 1악장", "d": "베토벤의 뜨거운 심장이 그대로 담긴 걸작.", "f": "l022.mid", "s": 658}, {"c": "beethoven", "t": "열정 소나타 3악장", "d": "손가락이 안 보일 만큼 빠른 극한의 피날레.", "f": "l023.mid", "s": 300}, {"c": "beethoven", "t": "고별 소나타 1악장", "d": "\"잘 가(Le-be-wohl)\" 세 음의 인사로 시작해요.", "f": "l024.mid", "s": 294}, {"c": "beethoven", "t": "쉬운 소나타 Op.49-2 1악장", "d": "피아노 학원에서 만나는 첫 베토벤 소나타!", "f": "l025.mid", "s": 243}, {"c": "schubert", "t": "군대 행진곡 (편곡)", "d": "씩씩한 행진곡이지만 사실 둘이서 함께 치는 연탄곡으로 만들어졌어요.", "f": "h07.mid", "s": 53}, {"c": "schubert", "t": "세레나데 (편곡)", "d": "밤에 사랑하는 사람의 창가에서 부르는 노래. 슈베르트 최후의 해에 쓴 애절한 멜로디예요.", "f": "h08.mid", "s": 90}, {"c": "chopin", "t": "전주곡 4번 e단조", "d": "단 12마디로 깊은 슬픔을 그린 곡. 쇼팽의 장례식에서 연주됐어요.", "f": "l026.mid", "s": 85}, {"c": "chopin", "t": "전주곡 7번 A장조", "d": "16마디의 짧고 우아한 춤.", "f": "l027.mid", "s": 27}, {"c": "chopin", "t": "전주곡 15번 «빗방울»", "d": "왼손이 처음부터 끝까지 빗방울처럼 똑똑 떨어져요.", "f": "l028.mid", "s": 206}, {"c": "chopin", "t": "전주곡 20번 c단조", "d": "장엄한 화음의 행진.", "f": "l029.mid", "s": 61}, {"c": "chopin", "t": "강아지 왈츠", "d": "강아지가 꼬리를 잡으려 빙글빙글! \"1분 왈츠\"라고도 불러요.", "f": "l030.mid", "s": 187}, {"c": "chopin", "t": "왈츠 Op.64-2", "d": "강아지 왈츠의 짝꿍. 우아하게 빙글빙글 돌아요.", "f": "l031.mid", "s": 288}, {"c": "chopin", "t": "화려한 대왈츠 Op.18", "d": "무도회장 문이 활짝 열리는 화려한 왈츠.", "f": "l032.mid", "s": 466}, {"c": "chopin", "t": "이별의 왈츠 Op.69-1", "d": "첫사랑에게 작별 선물로 준 애틋한 왈츠.", "f": "l033.mid", "s": 194}, {"c": "chopin", "t": "야상곡 Op.9-1", "d": "촛불 아래에서 듣는 것 같은 밤의 노래.", "f": "l034.mid", "s": 266}, {"c": "chopin", "t": "야상곡 Op.9-2", "d": "세상에서 가장 유명한 야상곡. 밤하늘의 별처럼 반짝여요.", "f": "l035.mid", "s": 257}, {"c": "chopin", "t": "야상곡 Op.15-2", "d": "나비처럼 가벼운 장식음이 매력인 야상곡.", "f": "l036.mid", "s": 188}, {"c": "chopin", "t": "이별의 곡 (Op.10-3)", "d": "쇼팽 스스로 \"이보다 아름다운 멜로디는 못 쓸 것\"이라 한 곡.", "f": "l037.mid", "s": 224}, {"c": "chopin", "t": "흑건 (Op.10-5)", "d": "오른손이 거의 검은 건반만 치는 신기한 연습곡!", "f": "l038.mid", "s": 89}, {"c": "chopin", "t": "혁명 (Op.10-12)", "d": "조국의 슬픈 소식에 쏟아낸 분노. 왼손이 폭풍처럼 몰아쳐요.", "f": "l039.mid", "s": 126}, {"c": "chopin", "t": "즉흥환상곡", "d": "빠른 오른손과 느린 왼손이 다른 박자로 달리는 마법.", "f": "l040.mid", "s": 276}, {"c": "chopin", "t": "군대 폴로네이즈", "d": "폴란드 기사들의 당당한 행진곡.", "f": "l041.mid", "s": 156}, {"c": "chopin", "t": "영웅 폴로네이즈", "d": "피아노 한 대로 군대의 진군을 그린 쇼팽 최고 걸작.", "f": "l042.mid", "s": 271}, {"c": "chopin", "t": "발라드 1번 g단조", "d": "조용한 이야기가 폭풍 같은 결말로 치닫는 영화 같은 곡.", "f": "l043.mid", "s": 728}, {"c": "chopin", "t": "자장가 Op.57", "d": "요람이 흔들리는 소리 위에 점점 화려해지는 꿈.", "f": "l044.mid", "s": 240}, {"c": "schumann", "t": "어린이 정경 1. 낯선 나라들에서", "d": "멀고 신기한 나라를 상상하는 아이의 마음.", "f": "l045.mid", "s": 44}, {"c": "schumann", "t": "어린이 정경 2. 이상한 이야기", "d": "깜짝 놀랄 이야기를 듣는 아이의 표정.", "f": "l046.mid", "s": 86}, {"c": "schumann", "t": "어린이 정경 3. 술래잡기", "d": "까르르 웃으며 도망 다니는 술래잡기!", "f": "l047.mid", "s": 36}, {"c": "schumann", "t": "어린이 정경 6. 큰 사건", "d": "아이에게는 정말정말 큰 사건!", "f": "l048.mid", "s": 47}, {"c": "schumann", "t": "트로이메라이 (꿈)", "d": "전 세계에서 가장 사랑받는 \"꿈\"의 음악.", "f": "l049.mid", "s": 116}, {"c": "schumann", "t": "어린이 정경 9. 목마의 기사", "d": "흔들목마를 타고 달리는 씩씩한 기사님!", "f": "l050.mid", "s": 47}, {"c": "schumann", "t": "어린이 정경 12. 잠드는 아이", "d": "스르르 눈이 감기는 아이.", "f": "l051.mid", "s": 63}, {"c": "schumann", "t": "어린이 정경 13. 시인의 이야기", "d": "이야기를 마친 시인이 조용히 책을 덮어요.", "f": "l052.mid", "s": 134}, {"c": "liszt", "t": "발렌슈타트 호수에서", "d": "스위스 호숫가의 잔잔한 물결을 그린 여행 일기.", "f": "l053.mid", "s": 136}, {"c": "liszt", "t": "샘가에서", "d": "샘물이 반짝이며 솟아오르는 리스트의 손가락 마법.", "f": "l054.mid", "s": 248}, {"c": "brahms", "t": "자장가 (편곡)", "d": "친구의 아기가 태어났을 때 선물한 노래.", "f": "h05.mid", "s": 100}, {"c": "brahms", "t": "왈츠 Op.39-15 (편곡)", "d": "무뚝뚝한 브람스 아저씨가 몰래 감춰둔 다정함 같은 왈츠.", "f": "h06.mid", "s": 81}, {"c": "tchaikovsky", "t": "사계 1월 «화롯가에서»", "d": "추운 겨울밤, 따뜻한 난로 앞의 평화.", "f": "l055.mid", "s": 265}, {"c": "tchaikovsky", "t": "사계 2월 «카니발»", "d": "눈의 나라의 신나는 축제!", "f": "l056.mid", "s": 161}, {"c": "tchaikovsky", "t": "사계 3월 «종달새의 노래»", "d": "봄을 알리는 종달새의 지저귐.", "f": "l057.mid", "s": 84}, {"c": "tchaikovsky", "t": "사계 4월 «갈풀꽃»", "d": "눈이 녹고 첫 꽃이 피는 4월.", "f": "l058.mid", "s": 185}, {"c": "tchaikovsky", "t": "사계 5월 «백야»", "d": "밤에도 환한 러시아의 5월.", "f": "l059.mid", "s": 217}, {"c": "tchaikovsky", "t": "사계 6월 «뱃노래»", "d": "사계에서 가장 유명한 곡. 조각배가 흔들흔들 떠가요.", "f": "l060.mid", "s": 348}, {"c": "tchaikovsky", "t": "사계 7월 «풀 베는 사람의 노래»", "d": "들판에서 일하는 사람들의 씩씩한 노래.", "f": "l061.mid", "s": 129}, {"c": "tchaikovsky", "t": "사계 8월 «추수»", "d": "바쁘게 곡식을 거두는 8월의 들판!", "f": "l062.mid", "s": 271}, {"c": "tchaikovsky", "t": "사계 9월 «사냥»", "d": "뿔나팔이 울리는 가을 사냥의 아침.", "f": "l063.mid", "s": 186}, {"c": "tchaikovsky", "t": "사계 10월 «가을의 노래»", "d": "낙엽 지는 가을의 쓸쓸하고 아름다운 노래.", "f": "l064.mid", "s": 240}, {"c": "tchaikovsky", "t": "사계 11월 «트로이카»", "d": "세 마리 말이 끄는 썰매가 눈길을 달려요.", "f": "l065.mid", "s": 224}, {"c": "tchaikovsky", "t": "사계 12월 «크리스마스»", "d": "한 해를 마무리하는 포근한 왈츠.", "f": "l066.mid", "s": 316}, {"c": "grieg", "t": "아리에타 Op.12-1", "d": "그리그의 첫 서정소품. 작지만 완벽한 보석.", "f": "l067.mid", "s": 51}, {"c": "grieg", "t": "왈츠 Op.12-2", "d": "노르웨이풍의 살짝 쓸쓸한 왈츠.", "f": "l068.mid", "s": 136}, {"c": "grieg", "t": "요정의 춤 Op.12-4", "d": "숲속 요정들이 폴짝폴짝! 가볍고 빠른 춤.", "f": "l069.mid", "s": 97}, {"c": "grieg", "t": "민요 Op.12-5", "d": "노르웨이 산골 마을의 소박한 노래.", "f": "l070.mid", "s": 101}, {"c": "grieg", "t": "나비 Op.43-1", "d": "나비가 팔랑팔랑 나는 모습을 소리로 옮겼어요.", "f": "l071.mid", "s": 87}, {"c": "grieg", "t": "봄에게 Op.43-6", "d": "긴 겨울이 끝나고 봄이 오는 감격.", "f": "l072.mid", "s": 324}, {"c": "grieg", "t": "트롤의 행진 Op.54-3", "d": "전설의 트롤들이 쿵쿵 행진해요!", "f": "l073.mid", "s": 184}, {"c": "grieg", "t": "야상곡 Op.54-4", "d": "북유럽 백야의 신비로운 밤 노래.", "f": "l074.mid", "s": 255}, {"c": "debussy", "t": "베르가마스크 1. 전주곡", "d": "달빛의 형제 곡. 화려하게 문을 열어요.", "f": "l075.mid", "s": 230}, {"c": "debussy", "t": "베르가마스크 2. 미뉴에트", "d": "옛 춤곡을 드뷔시식 물감으로 다시 칠했어요.", "f": "l076.mid", "s": 211}, {"c": "debussy", "t": "달빛 (클레르 드 륀)", "d": "피아노로 그린 가장 아름다운 달빛.", "f": "l077.mid", "s": 285}, {"c": "debussy", "t": "베르가마스크 4. 파스피에", "d": "가볍게 걷는 듯한 옛 춤곡.", "f": "l078.mid", "s": 321}, {"c": "debussy", "t": "어린이 세계 1. 그라두스 박사", "d": "연습곡을 억지로 치는 아이의 투덜거림!", "f": "l079.mid", "s": 143}, {"c": "debussy", "t": "어린이 세계 2. 코끼리의 자장가", "d": "인형 코끼리 짐보를 재우는 자장가.", "f": "l080.mid", "s": 321}, {"c": "debussy", "t": "어린이 세계 3. 인형의 세레나데", "d": "도자기 인형에게 바치는 앙증맞은 세레나데.", "f": "l081.mid", "s": 229}, {"c": "debussy", "t": "어린이 세계 4. 눈송이의 춤", "d": "창밖에 하늘하늘 내리는 눈송이들.", "f": "l082.mid", "s": 190}, {"c": "debussy", "t": "어린이 세계 5. 어린 양치기", "d": "들판에서 피리를 부는 양치기 소년.", "f": "l083.mid", "s": 109}, {"c": "debussy", "t": "골리워그의 케이크워크", "d": "드뷔시가 딸에게 선물한 신나는 춤곡. 재즈의 예고편!", "f": "l084.mid", "s": 141}, {"c": "satie", "t": "짐노페디 1번", "d": "당시 사람들은 이 곡을 듣고 어리둥절했지만, 지금은 세상에서 가장 편안한 음악으로 사랑받아요.", "f": "h04.mid", "s": 152}, {"c": "joplin", "t": "엔터테이너", "d": "영화 «스팅»으로 유명한 래그타임 대표곡. 몸이 저절로 들썩!", "f": "l085.mid", "s": 111}, {"c": "joplin", "t": "메이플 리프 래그", "d": "100년 전 미국에서 악보가 100만 장 넘게 팔린 곡.", "f": "l086.mid", "s": 101}, {"c": "joplin", "t": "이지 위너스", "d": "경쾌하게 달리는 승리의 래그.", "f": "l087.mid", "s": 157}, {"c": "joplin", "t": "엘리트 싱코페이션", "d": "엇박자(싱코페이션)의 교과서.", "f": "l088.mid", "s": 106}, {"c": "joplin", "t": "파인애플 래그", "d": "파인애플처럼 상큼한 래그.", "f": "l089.mid", "s": 107}, {"c": "joplin", "t": "솔라스", "d": "조플린의 유일한 느린 곡. 달콤한 세레나데.", "f": "l090.mid", "s": 126}];
+
+/* ---------- SMF(MIDI 파일) 파서 ---------- */
+function parseMidi(buf){
+  const d=new DataView(buf); let p=0;
+  const u32=()=>{const v=d.getUint32(p);p+=4;return v;}, u16=()=>{const v=d.getUint16(p);p+=2;return v;};
+  if(u32()!==0x4D546864) throw new Error('not midi');
+  const hlen=u32(); u16(); const ntr=u16(), div=u16(); p=8+hlen;
+  const tracks=[];
+  for(let i=0;i<ntr;i++){
+    if(p+8>buf.byteLength) break;
+    if(d.getUint32(p)!==0x4D54726B) break;
+    p+=4; const len=u32(), end=p+len, evs=[]; let tick=0, run=0;
+    while(p<end){
+      let dt=0,b; do{b=d.getUint8(p++); dt=(dt<<7)|(b&0x7f);}while(b&0x80);
+      tick+=dt;
+      let st=d.getUint8(p);
+      if(st<0x80){ st=run; } else { p++; if(st<0xF0) run=st; }
+      if(st===0xFF){ const ty=d.getUint8(p++); let l=0; do{b=d.getUint8(p++); l=(l<<7)|(b&0x7f);}while(b&0x80);
+        if(ty===0x51) evs.push({tick,tempo:(d.getUint8(p)<<16)|(d.getUint8(p+1)<<8)|d.getUint8(p+2)});
+        p+=l;
+      } else if(st===0xF0||st===0xF7){ let l=0; do{b=d.getUint8(p++); l=(l<<7)|(b&0x7f);}while(b&0x80); p+=l; }
+      else { const hi=st&0xF0;
+        if(hi===0xC0||hi===0xD0){ p+=1; }
+        else { const a=d.getUint8(p++), v=d.getUint8(p++);
+          if(hi===0x90) evs.push({tick,on:v>0,m:a,vel:v,ch:st&15});
+          else if(hi===0x80) evs.push({tick,on:false,m:a,vel:0,ch:st&15});
+        }
+      }
+    }
+    tracks.push(evs); p=end;
+  }
+  const tempos=[{tick:0,tempo:500000}];
+  tracks.forEach(evs=>evs.forEach(e=>{ if(e.tempo!==undefined) tempos.push({tick:e.tick,tempo:e.tempo}); }));
+  tempos.sort((a,b)=>a.tick-b.tick);
+  const cum=[]; let sec=0;
+  for(let i=0;i<tempos.length;i++){
+    if(i>0) sec+=(tempos[i].tick-tempos[i-1].tick)/div*tempos[i-1].tempo/1e6;
+    cum.push({tick:tempos[i].tick,sec:sec,tempo:tempos[i].tempo});
+  }
+  function t2s(tk){ let j=cum.length-1; while(j>0&&cum[j].tick>tk) j--;
+    return cum[j].sec+(tk-cum[j].tick)/div*cum[j].tempo/1e6; }
+  const notes=[];
+  tracks.forEach((evs,ti)=>{
+    const om={};
+    evs.forEach(e=>{
+      if(e.m===undefined) return;
+      const k=e.m+'_'+e.ch+'_'+ti;
+      if(e.on){ (om[k]=om[k]||[]).push(e); }
+      else { const s=(om[k]||[]).shift();
+        if(s){ const t0=t2s(s.tick), t1=t2s(e.tick);
+          notes.push({t:t0, d:Math.max(0.1,t1-t0), m:e.m, v:s.vel||70, g:ti+'_'+e.ch}); } }
+    });
+  });
+  notes.sort((a,b)=>a.t-b.t);
+  // 손 추정: 그룹 평균 음높이
+  const gp={}; notes.forEach(n=>{ (gp[n.g]=gp[n.g]||[]).push(n.m); });
+  const avg={}; Object.keys(gp).forEach(k=>{ avg[k]=gp[k].reduce((a,b)=>a+b,0)/gp[k].length; });
+  const ks=Object.keys(avg);
+  notes.forEach(n=>{ n.hand = ks.length>1 ? (avg[n.g]===Math.min(...ks.map(k=>avg[k]))?'L':'R') : (n.m<60?'L':'R'); });
+  let dur=0; notes.forEach(n=>{ if(n.t+n.d>dur) dur=n.t+n.d; });
+  return {notes:notes, dur:dur};
+}
+
+/* ---------- 예약 재생 (샘플) ---------- */
+function playSampleAt(m,when,dur,vol){
+  const buf=sampleCache[m];
+  const c=ac();
+  if(!buf){ loadSample(m);
+    const dly=Math.max(0,(when-c.currentTime))*1000;
+    const id=setTimeout(()=>synthNote(m,dur,vol),dly);
+    return {stop:()=>clearTimeout(id)};
+  }
+  const src=c.createBufferSource(); src.buffer=buf;
+  const g=c.createGain();
+  const rel=Math.max(0.5,Math.min(dur*1.1+0.25,5));
+  const v=Math.min(1.1,vol*2.4);
+  g.gain.setValueAtTime(v,when); g.gain.setValueAtTime(v,when+rel);
+  g.gain.exponentialRampToValueAtTime(0.001,when+rel+0.3);
+  src.connect(g); g.connect(master());
+  src.start(when); src.stop(when+rel+0.4);
+  return src;
+}
+
+/* ---------- 플레이어 ---------- */
+class LPlayer{
+  constructor(){ this.notes=[]; this.dur=0; this.playing=false; this.offset=0; this.speed=1; this.sched=null; this.srcs=[]; this.idx=0; this.onend=null; }
+  setData(p){ this.notes=p.notes; this.dur=p.dur; this.offset=0; }
+  now(){ return this.playing ? this.offset+(ac().currentTime-this.t0)*this.speed : this.offset; }
+  start(){
+    if(this.playing||!this.notes.length) return;
+    ac(); this.playing=true; this.t0=ac().currentTime+0.12;
+    this.idx=0; while(this.idx<this.notes.length&&this.notes[this.idx].t<this.offset) this.idx++;
+    this.sched=setInterval(()=>this.pump(),70); this.pump();
+  }
+  pump(){
+    if(!this.playing) return;
+    const hz=this.now()+0.4;
+    while(this.idx<this.notes.length && this.notes[this.idx].t<=hz){
+      const n=this.notes[this.idx++];
+      const when=this.t0+(n.t-this.offset)/this.speed;
+      const durS=n.d/this.speed;
+      if(midiOut){
+        const base=performance.now()+(when-ac().currentTime)*1000;
+        try{ midiOut.send([0x90,n.m,Math.min(110,n.v+8)],base);
+             midiOut.send([0x80,n.m,0],base+Math.max(120,durS*1000)); }catch(e){}
+      } else {
+        const s=playSampleAt(n.m,when,durS,(n.v/255)*0.65+0.10);
+        this.srcs.push(s); if(this.srcs.length>120) this.srcs.splice(0,40);
+      }
+    }
+    if(this.now()>=this.dur+0.6){ this.pause(); this.offset=0; if(this.onend) this.onend(); }
+  }
+  pause(){
+    if(!this.playing){ return; }
+    this.offset=this.now(); this.playing=false; clearInterval(this.sched);
+    pianoAllOff(); setTimeout(pianoAllOff,650);
+    this.srcs.forEach(s=>{ try{s.stop();}catch(e){} }); this.srcs=[];
+  }
+  seek(t){ const w=this.playing; this.pause(); this.offset=Math.max(0,Math.min(t,this.dur)); if(w) this.start(); }
+  setSpeed(v){ const w=this.playing; this.pause(); this.speed=v; if(w) this.start(); }
+}
+
+/* ---------- 폭포수 뷰 (캔버스) ---------- */
+class LFall{
+  constructor(cv,pl){ this.cv=cv; this.pl=pl; this.travel=2.6;
+    this.ctx=cv.getContext('2d'); this.keys={}; }
+  mapKeys(){
+    this.keys={}; const kb=document.getElementById('kb2'); if(!kb) return;
+    const kw=kb.offsetWidth||this.cv.clientWidth;
+    this.cv.width=kw; this.cv.height=this.cv.clientHeight;
+    kb.querySelectorAll('[data-m]').forEach(el=>{
+      this.keys[el.dataset.m]={x:el.offsetLeft,w:el.offsetWidth,b:el.classList.contains('bk')};
+    });
+  }
+  frame(){
+    const ctx=this.ctx, W=this.cv.width, H=this.cv.height;
+    if(!W) return;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='rgba(255,255,255,.06)';
+    Object.values(this.keys).forEach(k=>{ if(!k.b) ctx.fillRect(k.x,0,1,H); });
+    ctx.fillStyle='#fbbf24'; ctx.fillRect(0,H-3,W,3);
+    const now=this.pl.now(), notes=this.pl.notes;
+    let lo=0, hi=notes.length;
+    while(lo<hi){ const md=(lo+hi)>>1; if(notes[md].t<now-8) lo=md+1; else hi=md; }
+    const act=new Set();
+    for(let i=lo;i<notes.length;i++){
+      const n=notes[i]; if(n.t>now+this.travel) break;
+      const k=this.keys[n.m]; if(!k) continue;
+      if(n.t<=now && now<n.t+n.d) act.add(n.m);
+      const yB=(now-(n.t-this.travel))/this.travel*H;
+      const h=Math.max(10,n.d/this.travel*H*0.92);
+      const yT=yB-h;
+      if(yB<0||yT>H) continue;
+      ctx.fillStyle= n.hand==='L' ? (n.t<=now?'#93c5fd':'#3b82f6') : (n.t<=now?'#86efac':'#22c55e');
+      ctx.beginPath();
+      ctx.roundRect(k.x+1, yT, Math.max(6,k.w-2), h, 4);
+      ctx.fill();
+    }
+    const kb=document.getElementById('kb2');
+    if(kb) kb.querySelectorAll('[data-m]').forEach(el=>{
+      el.classList.toggle('pressed', act.has(+el.dataset.m));
+    });
+  }
+}
+
+/* ---------- 악보 플로우 뷰 ---------- */
+const LPXS=88;
+function buildLScore(notes,dur){
+  const W=Math.ceil(dur*LPXS)+400, topT=60, topB=170, gap=10, half=5;
+  let s='<svg width="'+W+'" height="250" viewBox="0 0 '+W+' 250" xmlns="http://www.w3.org/2000/svg" style="display:block">';
+  for(let i=0;i<5;i++){
+    s+='<line x1="0" y1="'+(topT+i*gap)+'" x2="'+W+'" y2="'+(topT+i*gap)+'" stroke="#999" stroke-width="1"/>';
+    s+='<line x1="0" y1="'+(topB+i*gap)+'" x2="'+W+'" y2="'+(topB+i*gap)+'" stroke="#999" stroke-width="1"/>';
+  }
+  const parts=[];
+  notes.forEach((n,i)=>{
+    const tre=n.hand!=='L';
+    const bY=(tre?topT:topB)+4*gap, bDi=tre?30:18;
+    let pc=n.m%12, acc=false; if(!(pc in LETTER_IDX)){ pc--; acc=true; }
+    const di=(Math.floor(n.m/12)-1)*7+LETTER_IDX[pc], dd=di-bDi;
+    const x=200+n.t*LPXS, y=bY-dd*half;
+    let el='';
+    for(let k=-2;k>=dd;k-=2) el+='<line x1="'+(x-7)+'" y1="'+(bY-k*half)+'" x2="'+(x+7)+'" y2="'+(bY-k*half)+'" stroke="#aaa" stroke-width="1"/>';
+    for(let k=10;k<=dd;k+=2) el+='<line x1="'+(x-7)+'" y1="'+(bY-k*half)+'" x2="'+(x+7)+'" y2="'+(bY-k*half)+'" stroke="#aaa" stroke-width="1"/>';
+    const tail=n.d*LPXS-6;
+    if(tail>10) el+='<rect x="'+(x+4)+'" y="'+(y-1.6)+'" width="'+tail+'" height="3.2" rx="1.6" fill="'+(tre?'rgba(34,197,94,.35)':'rgba(59,130,246,.35)')+'"/>';
+    if(acc) el+='<text x="'+(x-13)+'" y="'+(y+3.5)+'" font-size="11" fill="#666">♯</text>';
+    el+='<ellipse id="ln'+i+'" cx="'+x+'" cy="'+y+'" rx="4.6" ry="3.6" fill="'+(tre?'#15803d':'#1d4ed8')+'" transform="rotate(-14 '+x+' '+y+')"/>';
+    parts.push(el);
+  });
+  return s+'<g>'+parts.join('')+'</g></svg>';
+}
+
+/* ---------- 감상 UI ---------- */
+let lplayer=null, lview='score', lfall=null, lRaf=null, curL=-1, lLoaded=false, lCompSel='bach';
+function fmtT(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+('0'+s%60).slice(-2); }
+function openPiece(i){
+  stopListen();
+  curL=i; lLoaded=false;
+  const p=LSONGS[i], c=LDATA.find(x=>x.id===p.c);
+  document.getElementById('listenScreen').innerHTML=
+   '<div class="lp-head">'+
+   '<button style="border:none;background:none;font-size:15px;font-weight:800;color:#7c3aed;cursor:pointer;padding:0" onclick="homeTab=\'listen\';goHome()">◀ 감상 목록으로</button>'+
+   '<div class="lp-title">'+p.t+'</div>'+
+   '<div class="lp-sub">'+c.e+' '+c.n+' ('+c.y+') · '+fmtT(p.s)+'</div>'+
+   '<div class="lp-desc">'+p.d+'</div></div>'+
+   '<div class="lp-controls">'+
+   '<button class="lp-btn" id="lPlayBtn" onclick="lToggle()">▶ 재생</button>'+
+   '<button class="lp-btn small" onclick="lStop()">⏹ 처음부터</button>'+
+   '<div class="lp-progress" id="lProg" onclick="lSeek(event)"><div class="fill" id="lFill"></div></div>'+
+   '<span class="lp-time" id="lTime">0:00 / '+fmtT(p.s)+'</span>'+
+   '<div class="view-toggle">'+
+   '<button class="vt-btn'+(lview==='score'?' sel':'')+'" id="vtS" onclick="lSetView(\'score\')">🎼 악보</button>'+
+   '<button class="vt-btn'+(lview==='fall'?' sel':'')+'" id="vtF" onclick="lSetView(\'fall\')">🌊 폭포수</button></div>'+
+   '<div class="view-toggle">'+[0.75,1].map(v=>'<button class="vt-btn spd'+(v===1?' sel':'')+'" data-v="'+v+'" onclick="lSpeed('+v+',this)">'+(v===1?'정속':'75%')+'</button>').join('')+'</div>'+
+   '<span class="lp-out">'+(midiOut?'🎹 피아노로 연주됩니다':'🔊 스피커로 재생됩니다')+'</span>'+
+   '</div>'+
+   '<div class="lp-stage" id="lStage"><div style="text-align:center;color:#888;padding:40px 0" id="lLoading">🎵 악보를 불러오는 중...</div></div>';
+  showScreen('listenScreen');
+  fetch('midi/'+p.f).then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })
+   .then(b=>{
+     if(curL!==i) return;
+     lplayer=new LPlayer(); lplayer.setData(parseMidi(b));
+     lplayer.onend=()=>{ const bt=document.getElementById('lPlayBtn'); if(bt) bt.textContent='▶ 재생'; };
+     if(!midiOut){ const set=new Set(); lplayer.notes.forEach(n=>set.add(n.m)); set.forEach(m=>loadSample(m)); }
+     lLoaded=true; lBuildStage(); lLoop();
+   })
+   .catch(()=>{ const el=document.getElementById('lLoading');
+     if(el) el.innerHTML='😢 음원을 불러오지 못했어요.<br><span style="font-size:12px">인터넷 연결을 확인하거나, 배포된 웹 주소에서 열어주세요.</span>'; });
+}
+function lBuildStage(){
+  if(!lLoaded) return;
+  const st=document.getElementById('lStage'); if(!st) return;
+  if(lview==='fall'){
+    const ms=lplayer.notes.map(n=>n.m);
+    st.innerHTML='<canvas class="fall-canvas" id="lCv"></canvas>'+
+      '<div class="kb" id="kb2" style="height:120px;margin-top:8px"></div>';
+    buildKeyboard(Math.min(...ms),Math.max(...ms),'kb2');
+    lfall=new LFall(document.getElementById('lCv'),lplayer);
+    setTimeout(()=>lfall.mapKeys(),30);
+  } else {
+    st.innerHTML='<div class="lscore-wrap" id="lSW"><div class="playhead"></div><div id="lSIn">'+buildLScore(lplayer.notes,lplayer.dur)+'</div></div>'+
+      '<div style="font-size:11px;color:#999;margin-top:6px">🟢 초록 = 오른손 · 🔵 파랑 = 왼손 · 빨간 세로선이 지금 연주되는 위치예요 (간이 악보)</div>';
+    lfall=null; this._lit=[];
+  }
+}
+let _lit=[];
+function lLoop(){
+  cancelAnimationFrame(lRaf);
+  const step=()=>{
+    if(!lplayer || curL<0 || !document.getElementById('listenScreen').classList.contains('active')) return;
+    const now=lplayer.now();
+    const f=document.getElementById('lFill'), tm=document.getElementById('lTime');
+    if(f) f.style.width=(lplayer.dur? now/lplayer.dur*100:0)+'%';
+    if(tm) tm.textContent=fmtT(now)+' / '+fmtT(lplayer.dur);
+    if(lview==='fall'&&lfall) lfall.frame();
+    else {
+      const inw=document.getElementById('lSIn');
+      if(inw){ const ph=window.innerWidth<640?90:180;
+        inw.style.transform='translateX('+(ph-200-now*LPXS)+'px)';
+        _lit.forEach(el=>{ el.setAttribute('fill', el.dataset.h==='L'?'#1d4ed8':'#15803d'); }); _lit=[];
+        const ns=lplayer.notes;
+        let lo=0,hi=ns.length;
+        while(lo<hi){const md=(lo+hi)>>1; if(ns[md].t<now-6) lo=md+1; else hi=md;}
+        for(let i=lo;i<ns.length;i++){ const n=ns[i]; if(n.t>now) break;
+          if(now<n.t+n.d+0.05){ const el=document.getElementById('ln'+i);
+            if(el){ el.dataset.h=n.hand; el.setAttribute('fill','#ef4444'); _lit.push(el); } } }
+      }
+    }
+    lRaf=requestAnimationFrame(step);
+  };
+  lRaf=requestAnimationFrame(step);
+}
+function lToggle(){
+  if(!lLoaded) return;
+  const bt=document.getElementById('lPlayBtn');
+  if(lplayer.playing){ lplayer.pause(); if(bt) bt.textContent='▶ 재생'; }
+  else { lplayer.start(); if(bt) bt.textContent='⏸ 일시정지'; }
+}
+function lStop(){ if(lplayer){ lplayer.pause(); lplayer.offset=0; }
+  const bt=document.getElementById('lPlayBtn'); if(bt) bt.textContent='▶ 재생'; }
+function lSeek(ev){ if(!lLoaded) return;
+  const r=document.getElementById('lProg').getBoundingClientRect();
+  lplayer.seek((ev.clientX-r.left)/r.width*lplayer.dur); }
+function lSpeed(v,btn){ if(lplayer) lplayer.setSpeed(v);
+  document.querySelectorAll('.spd').forEach(b=>b.classList.toggle('sel', +b.dataset.v===v)); }
+function lSetView(v){ lview=v;
+  const a=document.getElementById('vtS'), b=document.getElementById('vtF');
+  if(a) a.classList.toggle('sel',v==='score'); if(b) b.classList.toggle('sel',v==='fall');
+  lBuildStage(); }
+function stopListen(){ if(lplayer){ lplayer.pause(); } cancelAnimationFrame(lRaf); curL=-1; }
+function listenHTML(){
+  let html='<div class="comp-grid">';
+  LDATA.forEach(c=>{
+    html+='<div class="comp-card'+(lCompSel===c.id?' sel':'')+'" onclick="lCompSel=\''+c.id+'\';renderHome()">'+
+      '<div class="comp-emoji">'+c.e+'</div><div class="comp-name">'+c.n+'</div><div class="comp-years">'+c.y+'</div></div>';
+  });
+  html+='</div>';
+  const c=LDATA.find(x=>x.id===lCompSel);
+  html+='<div class="comp-desc-box"><b>'+c.e+' '+c.n+' ('+c.y+')</b><br>'+c.d+'</div>';
+  html+='<div class="song-list">';
+  LSONGS.forEach((s,i)=>{
+    if(s.c!==lCompSel) return;
+    html+='<div class="song-row" onclick="openPiece('+i+')">'+
+      '<div class="song-title">'+s.t+'</div>'+
+      '<div class="lp-len">'+fmtT(s.s)+'</div></div>';
+  });
+  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 일부 곡은 자체 편곡</div>';
+  return html;
+}
+
 /* ================= 홈 화면 ================= */
 let homeTab='story', chCat='R';
 function setTab(t){ homeTab=t; renderHome(); }
@@ -1743,8 +2131,9 @@ function renderHome(){
   const h=document.getElementById('homeScreen');
   let html='<div class="home-tabs">'+
     '<button class="home-tab'+(homeTab==='story'?' sel':'')+'" onclick="setTab(\'story\')">🗺️ 메인스토리</button>'+
-    '<button class="home-tab'+(homeTab==='challenge'?' sel':'')+'" onclick="setTab(\'challenge\')">🏆 챌린지</button></div>';
-  html+= homeTab==='story' ? storyHTML() : challengeHTML();
+    '<button class="home-tab'+(homeTab==='challenge'?' sel':'')+'" onclick="setTab(\'challenge\')">🏆 챌린지</button>'+
+    '<button class="home-tab'+(homeTab==='listen'?' sel':'')+'" onclick="setTab(\'listen\')">🎧 음악감상</button></div>';
+  html+= homeTab==='story' ? storyHTML() : homeTab==='challenge' ? challengeHTML() : listenHTML();
   const total=LEVELS.reduce((a,_,i)=>a+(progress[i]||0),0);
   const chTotal=Object.values(cprog).reduce((a,p)=>a+(p.b||0)+(p.g||0),0);
   html+='<div class="home-foot"><span style="color:#fff;font-weight:bold">메인스토리 별 '+total+'/'+(LEVELS.length*3)+' ⭐ · 챌린지 별 '+chTotal+' ⭐</span><br><br>'+
@@ -1756,6 +2145,7 @@ function renderHome(){
 renderHome();
 initMidi(false);
 preloadRange(48,84);
+updSfxPill();
 window.addEventListener('pointerdown',()=>ac(),{once:true});
 </script>
 </body>
