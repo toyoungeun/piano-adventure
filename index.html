@@ -265,6 +265,77 @@
     animation:comboflash 1.1s forwards; pointer-events:none; }
   @keyframes comboflash { 0%{opacity:0;transform:scale(.5)} 30%{opacity:1;transform:scale(1.15)} 70%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(1.35)} }
   .hitline.flash { background:#fff; box-shadow:0 0 26px #fff; }
+
+  /* ---------- 반응형 최적화 ---------- */
+  button, .level-card, .song-row, .cat-card, .wk, .bk { touch-action:manipulation; }
+  .topbar { flex-wrap:nowrap; gap:8px; }
+  .topbar h1 { white-space:nowrap; }
+  .midi-pill { white-space:nowrap; }
+  .score-wrap svg { width:100%; height:auto; min-width:560px; }
+  @media (max-width:640px){
+    .topbar { padding:10px 10px; }
+    .topbar h1 { font-size:17px; }
+    .midi-pill { font-size:11px; padding:5px 8px; }
+    .screen { padding:0 8px 30px; }
+    .home-tabs { gap:6px; }
+    .home-tab { flex:1; padding:9px 10px; font-size:14px; }
+    .stage-block { padding:12px 12px; border-radius:16px; margin-bottom:12px; }
+    .stage-title { font-size:16px; }
+    .stage-desc { font-size:11px; margin-bottom:8px; }
+    .level-grid { gap:8px; }
+    .level-card { flex:1 1 40%; min-width:128px; padding:8px 6px; border-radius:12px; }
+    .level-num { font-size:9px; }
+    .level-name { font-size:13px; margin:3px 0; }
+    .level-type { font-size:10px; }
+    .level-stars { font-size:12px; margin-top:4px; }
+    .cat-row { gap:6px; margin-bottom:10px; }
+    .cat-card { min-width:0; padding:10px 4px; border-radius:14px; }
+    .cat-emoji { font-size:22px; }
+    .cat-name { font-size:12px; margin:4px 0 1px; }
+    .cat-sub { font-size:9.5px; }
+    .song-list { padding:4px 8px; border-radius:14px; }
+    .song-row { gap:6px; padding:9px 4px; }
+    .song-diff { width:54px; font-size:10px; letter-spacing:0; }
+    .song-title { font-size:13px; }
+    .song-badges { font-size:10px; }
+    .detail-card { padding:16px 14px; }
+    .detail-title { font-size:21px; }
+    .mode-btns { gap:6px; }
+    .mode-btn { min-width:96px; padding:11px 6px; font-size:14px; }
+    .mode-btn small { font-size:9.5px; }
+    .brief { font-size:13px; padding:12px; line-height:1.7; }
+    .hud { flex-wrap:wrap; gap:6px 8px; padding:8px 10px; border-radius:12px; margin-bottom:10px; }
+    .hud .lvname { font-size:13px; order:2; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .exit-btn { order:1; font-size:12px; padding:7px 10px; }
+    .miss-count { order:3; font-size:12px; }
+    .progress-wrap { order:4; flex:1 1 100%; height:10px; }
+    .qcard { padding:12px 10px; min-height:150px; border-radius:16px; margin-bottom:10px; }
+    .q-instruction { font-size:13px; }
+    .big-note-name { font-size:46px; }
+    .sub-note-name { font-size:14px; }
+    .feedback { font-size:16px; height:24px; }
+    .chip { font-size:14px; padding:4px 8px; }
+    .kb-outer { padding:10px; border-radius:16px; }
+    .kb { height:128px; }
+    .kb-tools { margin-bottom:8px; }
+    .kb-tools .kb-note { display:none; }
+    .kb-tools .hint-toggle { font-size:11px; padding:4px 9px; }
+    .wk .klabel { font-size:13px; bottom:5px; }
+    .kb.dense .klabel { font-size:10px; }
+    .kb.xdense .klabel { display:none; }
+    .fall-area { height:300px; }
+    .fall-note { font-size:12px; }
+    .judge { font-size:16px; }
+    .combo-big { font-size:32px; }
+    .rnote { font-size:36px; }
+    .timer-big { font-size:34px; }
+    .start-btn { font-size:17px; padding:12px 28px; }
+    .result-card { padding:28px 16px; margin:16px auto; }
+    .result-stars { font-size:44px; }
+    .result-card button { font-size:14px; padding:10px 14px; }
+    .modal { padding:18px; font-size:13px; }
+    .score-wrap { max-height:260px; }
+  }
 </style>
 </head>
 <body>
@@ -515,7 +586,7 @@ function noiseBuf(){
   return NOISEBUF;
 }
 /* 배음 합성 피아노: 기음+7배음, 인하모니시티, 이중 감쇠, 저역통과, 해머 노이즈 */
-function playNote(m, dur=1.6, vol=0.3){
+function synthNote(m, dur=1.6, vol=0.3){
   const c=ac(), t=c.currentTime, f=440*Math.pow(2,(m-69)/12);
   const decayMax=Math.min(4.5, Math.max(1.0, 3.4*Math.pow(220/f,0.55)));
   const end=Math.max(0.7, Math.min(dur*1.15+0.25, decayMax));
@@ -547,6 +618,42 @@ function playNote(m, dur=1.6, vol=0.3){
   ng.gain.exponentialRampToValueAtTime(0.001,t+0.05);
   ns.connect(nf); nf.connect(ng); ng.connect(master());
   ns.start(t); ns.stop(t+0.06);
+}
+/* ---------- 실제 피아노 샘플 (FluidR3 그랜드피아노) ---------- */
+const SAMPLE_SRC=[
+  'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/acoustic_grand_piano-mp3/',
+  'https://cdn.jsdelivr.net/gh/gleitz/midi-js-soundfonts@gh-pages/FluidR3_GM/acoustic_grand_piano-mp3/'
+];
+const SAMPLE_NAMES=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const sampleCache={}, samplePending={};
+let sampleSrcIdx=0, sampleDead=false;
+function sampleName(m){ return SAMPLE_NAMES[m%12]+(Math.floor(m/12)-1); }
+function loadSample(m){
+  if(sampleDead || sampleCache[m] || samplePending[m] || m<21 || m>108) return;
+  samplePending[m]=true;
+  const tryFetch=(i)=>fetch(SAMPLE_SRC[i]+sampleName(m)+'.mp3')
+    .then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })
+    .then(b=>ac().decodeAudioData(b))
+    .then(buf=>{ sampleCache[m]=buf; sampleSrcIdx=i; delete samplePending[m]; })
+    .catch(()=>{ if(i+1<SAMPLE_SRC.length) return tryFetch(i+1);
+      delete samplePending[m]; sampleDead=true; setTimeout(()=>{sampleDead=false;},30000); });
+  tryFetch(sampleSrcIdx);
+}
+function preloadRange(lo,hi){ for(let m=lo;m<=hi;m++) loadSample(m); }
+/* 샘플이 준비되면 진짜 피아노 소리, 아니면 합성음으로 즉시 재생 */
+function playNote(m, dur=1.6, vol=0.3){
+  const buf=sampleCache[m];
+  if(!buf){ loadSample(m); synthNote(m,dur,vol); return; }
+  const c=ac(), t=c.currentTime;
+  const src=c.createBufferSource(); src.buffer=buf;
+  const g=c.createGain();
+  const rel=Math.max(0.9, Math.min(dur*1.3+0.3, 6));
+  const v=Math.min(1.2, vol*2.6);
+  g.gain.setValueAtTime(v, t);
+  g.gain.setValueAtTime(v, t+rel);
+  g.gain.exponentialRampToValueAtTime(0.001, t+rel+0.4);
+  src.connect(g); g.connect(master());
+  src.start(t); src.stop(t+rel+0.5);
 }
 function sfxGood(){ playNote(84,.25,.15); setTimeout(()=>playNote(88,.3,.15),90); }
 function sfxBad(){ const c=ac(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();
@@ -585,6 +692,7 @@ let kbLo=60, kbHi=72;
 const activeNotes=new Set();
 function buildKeyboard(lo,hi){
   while(isBlack(lo))lo--; while(isBlack(hi))hi++;
+  preloadRange(lo,hi);
   kbLo=lo; kbHi=hi;
   const kb=document.getElementById('kb'); kb.innerHTML='';
   const whites=[]; for(let m=lo;m<=hi;m++) if(!isBlack(m)) whites.push(m);
@@ -1359,6 +1467,7 @@ function stopPreview(){ prevTimers.forEach(clearTimeout); prevTimers=[]; }
 function openSong(cat,i){
   stopPreview(); if(game&&game.stop){game.stop();} game=null; chMode=null;
   const s=CH[cat][i]; s.cat=cat; s.id=cat+i; s.idx=i; curSong=s;
+  makeEvents(s).forEach(e=>e.notes.forEach(n=>loadSample(n.m)));
   const p=cprog[s.id]||{};
   const st=n=>n?'★'.repeat(n)+'<span style="color:#ddd">'+'★'.repeat(3-n)+'</span>':'<span style="color:#bbb">아직 도전 전</span>';
   document.getElementById('detailScreen').innerHTML=
@@ -1646,6 +1755,7 @@ function renderHome(){
 /* ================= 시작 ================= */
 renderHome();
 initMidi(false);
+preloadRange(48,84);
 window.addEventListener('pointerdown',()=>ac(),{once:true});
 </script>
 </body>
