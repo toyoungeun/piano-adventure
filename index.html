@@ -2154,7 +2154,7 @@ function lvEnsure(pnum){
     if(el){ el.innerHTML=lv.pageSvg[pnum]; el.style.minHeight=''; }
   }catch(e){}
 }
-function lvUnlightAll(){ if(!lv) return;
+function lvUnlightAll(){ if(!lv) return; lv.curSys=null;
   Object.values(lv.lit).forEach(el=>{ el.style.fill=''; }); lv.lit={}; }
 /* ---------- 감상 UI ---------- */
 let lplayer=null, lview='score', lfall=null, lRaf=null, curL=-1, lLoaded=false, lCompSel='bach';
@@ -2250,12 +2250,12 @@ function lLoop(){
           if(!el && VRV){ try{ const pg=VRV.getPageWithElement(id); if(pg){ lvEnsure(pg); el=document.getElementById(id); } }catch(err){} }
           if(el){ el.style.fill='#ef4444'; lv.lit[id]=el;
             const sw=document.getElementById('vSW');
-            if(sw && lplayer.playing && performance.now()-lv.scT>400){
-              const er=el.getBoundingClientRect(), wr=sw.getBoundingClientRect();
-              const rel=er.top - wr.top;
-              if(rel < -4 || rel > wr.height*0.74){   /* 줄이 바뀔 때만: 한 줄분 지나면 한 번 이동 */
-                sw.scrollTo({top: sw.scrollTop + rel - wr.height*0.16, behavior:'smooth'});
-                lv.scT=performance.now();
+            if(sw && lplayer.playing){
+              const sysEl=el.closest('g.system')||el.closest('.system');
+              if(sysEl && sysEl!==lv.curSys){          /* 줄(시스템)이 바뀔 때만 1회 이동 */
+                lv.curSys=sysEl;
+                const er=sysEl.getBoundingClientRect(), wr=sw.getBoundingClientRect();
+                sw.scrollTo({top: sw.scrollTop+(er.top-wr.top)-wr.height*0.12, behavior:'smooth'});
               }
             }
           }
