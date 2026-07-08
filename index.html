@@ -2150,7 +2150,7 @@ async function loadPieceData(i,p){
   try{
     await loadVerovio();
     const base=p.f.replace(/\.mid$/,''), ext=KRN_SET.has(base)?'krn':'mxl';
-    const r=await fetch('scores/'+base+'.'+ext);
+    const r=await fetch('scores/'+base+'.'+ext,{cache:'no-store'});
     if(!r.ok) throw 0;
     const stEl=document.getElementById('lStage');
     const wrapW=Math.min((stEl?stEl.clientWidth:800)-16,1900)||800;
@@ -2170,7 +2170,7 @@ async function loadPieceData(i,p){
     lv={tm:tm,pages:VRV.getPageCount(),pageSvg:{},ptr:0,lit:{},lastMs:-1,scT:0,idx:i,noteTime:nt};
     return parseMidi(u8.buffer);
   }catch(e){ lv=null; }
-  const r2=await fetch('midi/'+p.f);
+  const r2=await fetch('midi/'+p.f,{cache:'no-store'});
   if(!r2.ok) throw 0;
   return parseMidi(await r2.arrayBuffer());
 }
@@ -2377,7 +2377,7 @@ function listenHTML(){
       '<div class="song-title">'+s.t+'</div>'+
       '<div class="lp-len">'+fmtT(s.du)+'</div></div>';
   });
-  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v15(스타카토 음 길이 반영)</div>';
+  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v16(악보 캐시 무시)</div>';
   return html;
 }
 
