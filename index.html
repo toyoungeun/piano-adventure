@@ -1505,7 +1505,17 @@ function renderScore(s){
   const ev=makeEvents(s), evIdx={};
   ev.forEach((e,i)=>evIdx[e.t.toFixed(4)]=i);
   const lines=Math.ceil(total/beatsPerLine);
-  const trackGap=92, lineH=104+(tracks.length-1)*trackGap;
+  // 두 손 세로 간격: 오른손 최저음(트레블 아래 덧줄)·왼손 최고음이 서로 겹치지 않게 자동 확장
+  let rhMinDi=999, lhMaxDi=-999;
+  tracks.forEach(tr=>{ tr.toks.forEach(k=>{ if(!k.ms) return; k.ms.forEach(m=>{ const di=diaIdx(m);
+    if(tr.hand!=='L') rhMinDi=Math.min(rhMinDi,di); else lhMaxDi=Math.max(lhMaxDi,di); }); }); });
+  let trackGap=92;
+  if(tracks.length>1 && rhMinDi<999 && lhMaxDi>-999){
+    const rhBelow=40-(rhMinDi-30)*5;      // 오른손 최저음이 트레블 top 아래로 뻗는 거리(px)
+    const lhAbove=(lhMaxDi-18)*5-40;      // 왼손 최고음이 베이스 top 위로 뻗는 거리(px)
+    trackGap=Math.max(92, rhBelow+Math.max(0,lhAbove)+26);
+  }
+  const lineH=104+(tracks.length-1)*trackGap;
   const H=lines*lineH+24+HEAD;
   let svg='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="display:block">';
   /* 머리말: 조성 · 템포 · 박자 */
@@ -2377,7 +2387,7 @@ function listenHTML(){
       '<div class="song-title">'+s.t+'</div>'+
       '<div class="lp-len">'+fmtT(s.du)+'</div></div>';
   });
-  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v17(얀키두들 운지 지정)</div>';
+  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v18(양손 악보 두 손 간격 자동)</div>';
   return html;
 }
 
