@@ -1472,8 +1472,11 @@ function computeFingering(toks,hand){
   const top=k=> R? Math.max(...k.ms): Math.min(...k.ms);
   const seq=[]; toks.forEach(k=>{ if(k.ms) seq.push({k:k, di:diaIdx(top(k))}); });
   if(!seq.length) return;
-  // 멜로디를 5음(다이어토닉) 안에 들어오는 최대 구간으로 나눠, 각 구간에서 1~5로 매김
-  let i=0;
+  const dis=seq.map(s=>s.di), gLo=Math.min.apply(null,dis), gHi=Math.max.apply(null,dis);
+  if(gHi-gLo<=4){   // 곡 전체가 5음 안 -> 한 손 위치 고정
+    seq.forEach(s=>{ const p=s.di-gLo; s.k._f = R? p+1 : 5-p; }); return;
+  }
+  let i=0;          // 넓은 곡: 5음 창으로 분절
   while(i<seq.length){
     let lo=seq[i].di, hi=seq[i].di, j=i;
     while(j+1<seq.length){
