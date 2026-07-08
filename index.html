@@ -355,7 +355,7 @@
   }
 
   /* ---------- 음악감상 ---------- */
-  .comp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; margin-bottom:14px; }
+  .comp-grid { display:grid; grid-template-columns:repeat(8,1fr); gap:8px; margin-bottom:14px; }
   .comp-card { min-width:0; background:rgba(255,255,255,.92); border-radius:14px;
     padding:10px 6px; cursor:pointer; text-align:center; border:3px solid transparent; transition:.15s; }
   .comp-card:hover { transform:translateY(-2px); }
@@ -400,7 +400,8 @@
   .vpage svg { display:block; margin:0 auto; pointer-events:none; }
   .vscore-wrap, .vpage { user-select:none; -webkit-user-select:none; }
   @media (max-width:640px){
-    .comp-card { min-width:80px; padding:8px 4px; } .comp-name { font-size:11px; }
+    .comp-grid { grid-template-columns:repeat(4,1fr); }
+    .comp-card { min-width:0; padding:8px 4px; } .comp-name { font-size:11px; }
     .lp-title { font-size:17px; } .lp-btn { padding:13px 18px; font-size:15px; }
     .fall-canvas { height:240px; } .lscore-wrap { height:260px; } .vscore-wrap { height:320px; }
     .lscore-wrap .playhead { left:90px; }
