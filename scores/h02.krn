@@ -1,0 +1,182 @@
+**kern	**kern
+*clefF4	*clefG2
+*k[f#c#]	*k[f#c#]
+*M4/4	*M4/4
+=1	=1
+2D	1r
+2AA	.
+=2	=2
+2BB	1r
+2FF#	.
+=3	=3
+2GG	1r
+2D	.
+=4	=4
+2GG	1r
+2AA	.
+=5	=5
+2D	2d 2f#
+2AA	2c# 2e
+=6	=6
+2BB	2B 2d
+2FF#	2A 2c#
+=7	=7
+2GG	2B 2d
+2D	2F# 2A
+=8	=8
+2GG	2G 2B
+2AA	2A 2c#
+=9	=9
+2D	2ff#
+2AA	2ee
+=10	=10
+2BB	2dd
+2FF#	2cc#
+=11	=11
+2GG	2b
+2D	2a
+=12	=12
+2GG	2b
+2AA	2cc#
+=13	=13
+2D	4dd
+.	4cc#
+2AA	4b
+.	4a
+=14	=14
+2BB	4g
+.	4f#
+2FF#	4g
+.	4e
+=15	=15
+2GG	4d
+.	4f#
+2D	4a
+.	4g
+=16	=16
+2GG	4f#
+.	4d
+2AA	4f#
+.	4e
+=17	=17
+2D	4d
+.	4B
+2AA	4d
+.	4a
+=18	=18
+2BB	4g
+.	4b
+2FF#	4a
+.	4g
+=19	=19
+2GG	4f#
+.	4d
+2D	4e
+.	4cc#
+=20	=20
+2GG	4dd
+.	4ff#
+2AA	4aa
+.	4a
+=21	=21
+2D	8dd
+.	8ff#
+.	8aa
+.	8ff#
+2AA	8ee
+.	8gg
+.	8ee
+.	8cc#
+=22	=22
+2BB	8dd
+.	8ff#
+.	8b
+.	8dd
+2FF#	8a
+.	8cc#
+.	8ee
+.	8a
+=23	=23
+2GG	8b
+.	8dd
+.	8g
+.	8b
+2D	8a
+.	8dd
+.	8ff#
+.	8dd
+=24	=24
+2GG	8g
+.	8b
+.	8dd
+.	8b
+2AA	8a
+.	8cc#
+.	8ee
+.	8gg
+=25	=25
+2D	2ff# 2aa
+2AA	2ee 2gg
+=26	=26
+2BB	2dd 2ff#
+2FF#	2cc# 2ee
+=27	=27
+2GG	2b 2dd
+2D	2a 2ff#
+=28	=28
+2GG	2b 2gg
+2AA	2cc# 2ee
+=29	=29
+2D	2ff#
+2AA	2ee
+=30	=30
+2BB	2dd
+2FF#	2cc#
+=31	=31
+2GG	2b
+2D	2a
+=32	=32
+2GG	2b
+2AA	2cc#
+=33	=33
+2D	2dd 2ff#
+2AA	2ee 2gg
+=34	=34
+2BB	2ff# 2aa
+2FF#	2ee 2gg
+=35	=35
+2GG	2dd 2ff#
+2D	2cc# 2ee
+=36	=36
+2GG	2b 2dd
+2AA	2cc# 2ee
+=37	=37
+2D	1dd 1ff#
+2AA	.
+=38	=38
+2BB	1cc# 1ee
+2FF#	.
+=39	=39
+2GG	1d 1f# 1a 1dd
+2D	.
+=40	=40
+2GG	1d 1f# 1a 1dd
+2AA	.
+=41	=41
+2D	1r
+2AA	.
+=42	=42
+2BB	1r
+2FF#	.
+=43	=43
+2GG	1r
+2D	.
+=44	=44
+2GG	1r
+2AA	.
+=45	=45
+1DD 1D	1r
+=46	=46
+1DD 1D	1r
+==	==
+*-	*-

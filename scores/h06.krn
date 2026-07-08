@@ -1,0 +1,273 @@
+**kern	**kern
+*clefG2	*clefG2
+*k[b-e-a-d-]	*k[b-e-a-d-]
+*M3/4	*M3/4
+=1	=1
+4G#	4.DD# 4.C
+4d# 4g# 4cc	.
+.	8CC 8GG#
+4c 4d# 4g#	8CC 8GG#
+.	8DD# 8C
+=2	=2
+4GG#	4.DD# 4.C
+4d# 4g# 4cc	.
+.	8CC 8GG#
+4c 4d# 4g#	8CC 8GG#
+.	8DD# 8C
+=3	=3
+4G#	8FF 8GG# 8C#
+.	16FF 16GG# 16D#
+.	16FF 16GG# 16C#
+4c# 4f 4cc#	4DD# 4GG# 4C
+4f 4g#	4CC# 4GG# 4AA#
+=4	=4
+4GG#	4.D# 4.G# 4.c
+4d# 4g# 4cc	.
+.	8G#
+4c 4d# 4g#	8G#
+.	8c 8d#
+=5	=5
+4F	4.G# 4.c 4.f
+4f 4g# 4cc 4ff	.
+.	8G# 8c
+4G# 4d# 4cc	8G# 8c
+.	8d#
+=6	=6
+4F	4.G# 4.c 4.f
+4f 4g# 4cc 4ff	.
+.	8G# 8c
+4G# 4d# 4cc	8G# 8c
+.	8d#
+=7	=7
+4D#	8G 8c 8g
+.	8G 8c 8f
+4d# 4g 4cc	4G 4c 4d#
+4G 4f 4b	4F 4B 4d
+=8	=8
+4C	4.g 4.cc 4.dd#
+4d# 4g 4cc	.
+.	8d# 8g
+4c 4d#	8d# 8g
+.	8cc
+=9	=9
+4G#	4.d# 4.cc
+4d# 4g# 4cc	.
+.	8c 8g#
+4c 4d# 4g#	8c 8g#
+.	8d# 8cc
+=10	=10
+4GG#	4.d# 4.cc
+4d# 4g# 4cc	.
+.	8c 8g#
+4c 4d# 4g#	8c 8g#
+.	8d# 8cc
+=11	=11
+4G#	8f 8g# 8cc#
+.	16d# 16g# 16dd#
+.	16d# 16g# 16cc#
+4c# 4f 4cc#	8c# 8g# 8cc
+.	8cc
+4f 4g#	4a#
+=12	=12
+4GG#	4.dd# 4.gg# 4.ccc
+4d# 4g# 4cc	.
+.	8gg#
+4c 4d# 4g#	8gg#
+.	8ccc 8ddd#
+=13	=13
+4F	4.gg# 4.ccc 4.fff
+4f 4g# 4cc 4ff	.
+.	8gg# 8ccc
+4G# 4d# 4cc	8gg# 8ccc
+.	8ddd#
+=14	=14
+4F	4.gg# 4.ccc 4.fff
+4f 4g# 4cc 4ff	.
+.	8gg# 8ccc
+4G# 4d# 4cc	8gg# 8ccc
+.	8ddd#
+=15	=15
+4D#	8gg 8ccc 8ggg
+.	8gg 8ccc 8fff
+4d# 4g 4cc	4gg 4ccc 4ddd#
+4G 4f 4b	4ff 4bb 4ddd
+=16	=16
+4C	4.ggg 4.cccc 4.dddd#
+4d# 4g 4cc	.
+.	8ddd# 8ggg 8cccc
+4c 4d# 4g	8ddd# 8ggg 8cccc
+.	8dddd#
+=17	=17
+4D#	4.ddd# 4.ggg 4.aaa# 4.cccc# 4.dddd#
+4d# 4g 4cc#	.
+.	8ddd# 8ggg 8aaa#
+4d# 4g	8ddd# 8ggg 8aaa#
+.	8cccc# 8dddd#
+=18	=18
+4G#	4.ddd# 4.ggg# 4.cccc 4.dddd#
+4d# 4g# 4cc	.
+.	8ggg# 8cccc
+4d# 4g#	8ggg# 8cccc
+.	8dddd#
+=19	=19
+4GG#	4.ggg# 4.cccc 4.dddd# 4.ffff# 4.gggg#
+4g# 4cc 4ff#	.
+.	8ggg# 8cccc 8dddd#
+4g# 4cc	8ggg# 8cccc 8dddd#
+.	8ffff# 8gggg#
+=20	=20
+4C#	4.ggg# 4.cccc# 4.ffff 4.gggg#
+4g# 4cc# 4ff	.
+.	8ggg# 8cccc# 8ffff
+4g# 4cc#	8ggg# 8cccc# 8ffff
+.	8gggg#
+=21	=21
+4AA# 4A#	4.ggg# 4.aaa# 4.dddd 4.ffff 4.aaaa#
+4g# 4a# 4dd 4ff	.
+.	8aaa# 8dddd 8ffff
+4f 4a# 4dd	8aaa# 8dddd 8ffff
+.	8gggg#
+=22	=22
+4D#	8gggg# 8aaaa# 8ccccc#
+.	8gggg 8aaaa# 8ccccc#
+4d# 4a# 4cc#	4ffff 4gggg# 4ccccc#
+4d# 4a# 4dd#	4dddd# 4gggg 4ccccc#
+=23	=23
+4G#	4.dddd# 4.ccccc
+4d# 4g# 4cc	.
+.	8cccc 8gggg#
+4c 4d# 4g#	8cccc 8gggg#
+.	8dddd# 8ccccc
+=24	=24
+4GG#	4.dddd# 4.ccccc
+4d# 4g# 4cc	.
+.	8cccc 8gggg#
+4c 4d# 4g#	8cccc 8gggg#
+.	8dddd# 8ccccc
+=25	=25
+4G#	8ffff 8gggg# 8ccccc#
+.	16ffff 16gggg# 16ddddd#
+.	16ffff 16gggg# 16ccccc#
+4c# 4f 4cc#	4dddd# 4gggg# 4ccccc
+4f 4g#	4cccc# 4gggg# 4aaaa#
+=26	=26
+4GG#	4.ddddd# 4.ggggg# 4.cccccc
+4d# 4g# 4cc	.
+.	8ggggg#
+4c 4d# 4g#	8ggggg#
+.	8cccccc 8dddddd#
+=27	=27
+4F	4.ggggg# 4.cccccc 4.ffffff
+4f 4g# 4cc 4ff	.
+.	8ggggg# 8cccccc
+4G# 4d# 4cc	8ggggg# 8cccccc
+.	8dddddd#
+=28	=28
+4F	4.ggggg# 4.cccccc 4.ffffff
+4f 4g# 4cc 4ff	.
+.	8ggggg# 8cccccc
+4G# 4d# 4cc	8ggggg# 8cccccc
+.	8dddddd#
+=29	=29
+4C	8ggggg#
+.	8ggggg# 8dddddd#
+4D#	4cccccc# 4gggggg
+4d# 4g	4aaaaa# 4cccccc# 4dddddd#
+=30	=30
+4G#	4ggggg# 4cccccc 4dddddd#
+4d# 4g#	8r
+.	8ggggg# 8cccccc 8dddddd#
+4d# 4g# 4cc	8ggggg# 8cccccc 8dddddd#
+.	8dddddd#
+=31	=31
+4D#	4.aaaaa# 4.cccccc# 4.dddddd# 4.dddddd# 4.gggggg
+4d# 4g 4cc#	.
+.	8aaaaa# 8dddddd# 8gggggg
+4d# 4g	8aaaaa# 8dddddd# 8gggggg
+.	8cccccc# 8dddddd#
+=32	=32
+4G#	4.CCCC 4.DDDD# 4.DDD 4.GGG
+4d# 4g# 4cc	.
+.	8GGG# 8CC
+4d# 4g#	8GGG# 8CC
+.	8DD#
+=33	=33
+4GG#	4.GGG# 4.CC 4.DD# 4.FF# 4.GG#
+4g# 4cc 4ff#	.
+.	8GGG# 8CC 8DD#
+4g# 4cc	8GGG# 8CC 8DD#
+.	8FF# 8GG#
+=34	=34
+4C#	4.GGG# 4.CC# 4.FF 4.GG#
+4g# 4cc# 4ff	.
+.	8GGG# 8CC# 8FF
+4g# 4cc#	8GGG# 8CC# 8FF
+.	8GG#
+=35	=35
+4AA# 4A#	4.GGG# 4.AAA# 4.DD 4.FF 4.AA#
+4g# 4a# 4dd 4ff	.
+.	8AAA# 8DD 8FF
+4f 4a# 4dd	8AAA# 8DD 8FF
+.	8GG#
+=36	=36
+4D#	8GG# 8AA# 8C#
+.	8GG 8GG# 8C#
+4d# 4a# 4cc#	8FF 8GG 8C#
+.	8FF
+4d# 4a# 4dd#	4DD#
+=37	=37
+4GG#	4D# 4c
+4d# 4g# 4cc	12r
+.	12CC 12GG#
+.	12DD# 12C
+4c 4d# 4g#	12C 12G#
+.	12D# 12c
+.	12C 12G#
+=38	=38
+4GG#	4D# 4c
+4d# 4g# 4cc	12r
+.	12CC 12GG#
+.	12DD# 12C
+4c 4d# 4g#	12C 12G#
+.	12D# 12c
+.	12C 12G#
+=39	=39
+4C#	8F 8G# 8c#
+.	16F 16G# 16d#
+.	16F 16G# 16c#
+4c# 4g#	4D# 4G# 4c
+4f 4g#	4C# 4G# 4A#
+=40	=40
+4GG#	4d# 4g# 4cc
+4d# 4g# 4cc	12r
+.	12C 12G#
+.	12D# 12c
+4c 4d# 4g#	12c 12g#
+.	12d# 12cc
+.	12f 12cc
+=41	=41
+4F	4F 4G# 4c 4f
+4f 4g# 4cc	12r
+.	12C 12G#
+.	12D# 12c
+4G# 4d# 4g#	12c 12g#
+.	12d# 12cc
+.	12f 12cc
+=42	=42
+4F	4F 4G# 4c 4f
+4f 4g# 4cc	12r
+.	12C 12G#
+.	12D# 12c
+4G# 4d# 4g#	12c 12g#
+.	12d# 12cc
+.	12g# 12cc
+=43	=43
+4C	8G# 8c 8g#
+.	8G# 8c 8d#
+4D#	4C# 4G 4c#
+4d# 4g 4cc#	4AA# 4C# 4A#
+=44	=44
+4GG#	4GG# 4C 4g#
+4d# 4g# 4cc	4r
+==	==
+*-	*-

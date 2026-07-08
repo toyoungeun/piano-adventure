@@ -28,7 +28,7 @@
     color:#fff; cursor:pointer; transition:.2s;
   }
   .midi-pill.on { background:#2ecc71; border-color:#2ecc71; }
-  .screen { display:none; max-width:1500px; margin:0 auto; padding:0 20px 40px; }
+  .screen { display:none; max-width:min(2100px,97vw); margin:0 auto; padding:0 20px 40px; }
   .screen.active { display:block; }
 
   /* ---------- HOME ---------- */
@@ -2097,7 +2097,7 @@ function buildLScore(notes,dur,flat){
 }
 
 /* ---------- Verovio (정식 악보 엔진) ---------- */
-const KRN_SET=new Set(["l000", "l001", "l002", "l003", "l004", "l005", "l006", "l007", "l008", "l009", "l010", "l011", "l012", "l013", "l014", "l015", "l016", "l017", "l018", "l019", "l020", "l021", "l022", "l023", "l024", "l025", "l026", "l027", "l028", "l029", "l030", "l031", "l032", "l033", "l034", "l035", "l036", "l037", "l038", "l039", "l040", "l041", "l042", "l043", "l044", "l085", "l086", "l087", "l088", "l089", "l090"]);
+const KRN_SET=new Set(["h00","h01","h02","h03","h04","h05","h06","h07","h08","l000", "l001", "l002", "l003", "l004", "l005", "l006", "l007", "l008", "l009", "l010", "l011", "l012", "l013", "l014", "l015", "l016", "l017", "l018", "l019", "l020", "l021", "l022", "l023", "l024", "l025", "l026", "l027", "l028", "l029", "l030", "l031", "l032", "l033", "l034", "l035", "l036", "l037", "l038", "l039", "l040", "l041", "l042", "l043", "l044", "l085", "l086", "l087", "l088", "l089", "l090"]);
 let VRV=null, vrvLoading=null, lv=null;
 function loadVerovio(){
   if(VRV) return Promise.resolve(VRV);
@@ -2122,7 +2122,7 @@ async function loadPieceData(i,p){
     const r=await fetch('scores/'+base+'.'+ext);
     if(!r.ok) throw 0;
     const stEl=document.getElementById('lStage');
-    const wrapW=Math.min((stEl?stEl.clientWidth:800)-16,1100)||800;
+    const wrapW=Math.min((stEl?stEl.clientWidth:800)-16,1900)||800;
     const scale=window.innerWidth<640?33:40;
     VRV.setOptions({scale:scale,pageWidth:Math.max(800,Math.floor(wrapW*100/scale)),
       adjustPageHeight:true,footer:'none',header:'none',breaks:'auto'});
@@ -2247,10 +2247,11 @@ function lLoop(){
           if(!el && VRV){ try{ const pg=VRV.getPageWithElement(id); if(pg){ lvEnsure(pg); el=document.getElementById(id); } }catch(err){} }
           if(el){ el.style.fill='#ef4444'; lv.lit[id]=el;
             const sw=document.getElementById('vSW');
-            if(sw && lplayer.playing && performance.now()-lv.scT>700){
+            if(sw && lplayer.playing && performance.now()-lv.scT>450){
               const er=el.getBoundingClientRect(), wr=sw.getBoundingClientRect();
-              if(er.top<wr.top+30 || er.bottom>wr.bottom-30){
-                sw.scrollTo({top: sw.scrollTop+(er.top-wr.top)-wr.height*0.35, behavior:'smooth'});
+              const rel=(er.top+er.bottom)/2 - wr.top;
+              if(rel < wr.height*0.30 || rel > wr.height*0.52){
+                sw.scrollTo({top: sw.scrollTop + rel - wr.height*0.40, behavior:'smooth'});
                 lv.scT=performance.now();
               }
             }
