@@ -108,8 +108,8 @@
   /* quiz */
   .quiz-opts { display:flex; flex-direction:column; gap:10px; margin-top:14px; width:100%; max-width:440px; }
   .quiz-opts button {
-    background:#fff; border:3px solid #e5e7eb; border-radius:14px; padding:12px 16px;
-    font-size:17px; font-weight:800; cursor:pointer; color:#444; transition:.15s;
+    background:#fff; border:3px solid #e5e7eb; border-radius:14px; padding:16px 18px;
+    font-size:18px; font-weight:800; cursor:pointer; color:#444; transition:.15s; min-height:56px;
   }
   .quiz-opts button:hover { border-color:#a78bfa; }
   .quiz-opts button.right { background:#d1fae5; border-color:#10b981; color:#059669; }
@@ -139,7 +139,7 @@
   }
   .kb-tools .hint-toggle.off { background:#f3f4f6; border-color:#d1d5db; color:#9ca3af; }
   .kb-tools .kb-note { font-size:12px; color:#999; }
-  .kb { position:relative; height:170px; display:flex; }
+  .kb { position:relative; height:200px; display:flex; }
   .wk {
     flex:1; background:linear-gradient(180deg,#fff 0%,#f8f8f8 100%);
     border:1px solid #ccc; border-radius:0 0 8px 8px; position:relative; cursor:pointer;
@@ -174,8 +174,8 @@
   .result-title { font-size:26px; font-weight:900; }
   .result-msg { color:#888; margin:8px 0 20px; font-size:15px; }
   .result-card button {
-    border:none; border-radius:14px; padding:12px 22px; font-size:16px; font-weight:800;
-    cursor:pointer; margin:4px;
+    border:none; border-radius:14px; padding:15px 26px; font-size:17px; font-weight:800;
+    cursor:pointer; margin:6px; min-height:52px;
   }
   .btn-next { background:linear-gradient(135deg,#10b981,#059669); color:#fff; }
   .btn-retry { background:#ede9fe; color:#7c3aed; }
@@ -199,7 +199,7 @@
   staff-holder { display:block; }
   /* ---------- 홈 탭 / 챌린지 ---------- */
   .home-tabs { display:flex; gap:10px; margin-bottom:16px; justify-content:center; }
-  .home-tab { background:rgba(255,255,255,.25); color:#fff; border:none; font-size:16px; font-weight:800; padding:10px 28px; border-radius:14px; cursor:pointer; }
+  .home-tab { background:rgba(255,255,255,.25); color:#fff; border:none; font-size:17px; font-weight:800; padding:14px 30px; border-radius:14px; cursor:pointer; }
   .home-tab.sel { background:#fff; color:#7c3aed; }
   .cat-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
   .cat-card { flex:1; min-width:170px; background:rgba(255,255,255,.92); border-radius:18px; padding:16px; cursor:pointer; text-align:center; border:3px solid transparent; transition:.15s; }
@@ -236,12 +236,13 @@
   .fn-L { background:linear-gradient(180deg,#60a5fa,#2563eb); }
   .fall-note.hitfx { background:#fff !important; opacity:0; transition:.25s; }
   .fall-note.missfx { background:#ef4444 !important; opacity:0; transition:.5s; }
+  .fall-note.holding { filter:brightness(1.55) saturate(1.2); box-shadow:0 0 20px rgba(255,255,255,.95); }
   .hitline { position:absolute; left:0; right:0; bottom:0; height:4px; background:#fbbf24; box-shadow:0 0 12px #fbbf24; z-index:4; }
   .fall-hud { position:absolute; top:8px; left:12px; color:#fff; font-weight:900; font-size:16px; text-shadow:0 1px 3px #000; z-index:5; }
   .fall-combo { position:absolute; top:8px; right:12px; color:#fbbf24; font-weight:900; font-size:18px; z-index:5; text-shadow:0 1px 3px #000; }
   .fall-count { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:70px; font-weight:900; color:#fff; z-index:6; text-shadow:0 2px 8px #000; pointer-events:none; }
   .speed-btns { display:flex; gap:8px; justify-content:center; }
-  .speed-btn { border:2px solid #a78bfa; background:#fff; color:#7c3aed; border-radius:10px; padding:6px 14px; font-weight:800; cursor:pointer; }
+  .speed-btn { border:2px solid #a78bfa; background:#fff; color:#7c3aed; border-radius:10px; padding:11px 18px; font-weight:800; cursor:pointer; font-size:15px; }
   .speed-btn.sel { background:#7c3aed; color:#fff; }
   /* ---------- 나가기 버튼 & 게임모드 이펙트 ---------- */
   .exit-btn { background:#f3f4f6; border:none; border-radius:12px; padding:9px 14px;
@@ -270,6 +271,7 @@
 
   /* ---------- 반응형 최적화 ---------- */
   button, .level-card, .song-row, .cat-card, .wk, .bk { touch-action:manipulation; }
+  button { min-height:44px; }
   .topbar { flex-wrap:nowrap; gap:8px; }
   .topbar h1 { white-space:nowrap; }
   .midi-pill { white-space:nowrap; }
@@ -280,7 +282,7 @@
     .midi-pill { font-size:11px; padding:5px 8px; }
     .screen { padding:0 8px 30px; }
     .home-tabs { gap:6px; }
-    .home-tab { flex:1; padding:9px 10px; font-size:14px; }
+    .home-tab { flex:1; padding:13px 12px; font-size:15px; }
     .stage-block { padding:12px 12px; border-radius:16px; margin-bottom:12px; }
     .stage-title { font-size:16px; }
     .stage-desc { font-size:11px; margin-bottom:8px; }
@@ -303,7 +305,7 @@
     .detail-card { padding:16px 14px; }
     .detail-title { font-size:21px; }
     .mode-btns { gap:6px; }
-    .mode-btn { min-width:96px; padding:11px 6px; font-size:14px; }
+    .mode-btn { min-width:96px; padding:15px 8px; font-size:15px; }
     .mode-btn small { font-size:9.5px; }
     .brief { font-size:13px; padding:12px; line-height:1.7; }
     .hud { flex-wrap:wrap; gap:6px 8px; padding:8px 10px; border-radius:12px; margin-bottom:10px; }
@@ -318,10 +320,10 @@
     .feedback { font-size:16px; height:24px; }
     .chip { font-size:14px; padding:4px 8px; }
     .kb-outer { padding:10px; border-radius:16px; }
-    .kb { height:128px; }
+    .kb { height:156px; }
     .kb-tools { margin-bottom:8px; }
     .kb-tools .kb-note { display:none; }
-    .kb-tools .hint-toggle { font-size:11px; padding:4px 9px; }
+    .kb-tools .hint-toggle { font-size:13px; padding:8px 13px; }
     .wk .klabel { font-size:13px; bottom:5px; }
     .kb.dense .klabel { font-size:10px; }
     .kb.xdense .klabel { display:none; }
@@ -364,14 +366,17 @@
   .lp-desc { color:#666; font-size:13px; margin-top:8px; line-height:1.7; }
   .lp-controls { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.95);
     border-radius:16px; padding:10px 14px; margin-bottom:12px; flex-wrap:wrap; }
-  .lp-btn { border:none; border-radius:12px; padding:10px 18px; font-size:16px; font-weight:900;
-    cursor:pointer; background:linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; }
-  .lp-btn.small { padding:8px 12px; font-size:13px; background:#f3f4f6; color:#555; }
-  .lp-progress { flex:1; min-width:120px; height:14px; background:#eee; border-radius:8px; cursor:pointer; position:relative; overflow:hidden; }
+  .lp-btn { border:none; border-radius:12px; padding:13px 22px; font-size:17px; font-weight:900;
+    cursor:pointer; background:linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; min-height:48px; }
+  .lp-btn.small { padding:11px 16px; font-size:14px; background:#f3f4f6; color:#555; }
+  .lp-progress { flex:1; min-width:120px; height:20px; background:#eee; border-radius:10px; cursor:pointer; position:relative; overflow:hidden; touch-action:none; }
+  .lp-progress .knob { position:absolute; top:50%; width:24px; height:24px; margin-left:-12px; background:#7c3aed; border:3px solid #fff; border-radius:50%; transform:translateY(-50%); box-shadow:0 1px 4px rgba(0,0,0,.4); pointer-events:none; }
+  .vscore-wrap g.note, .vscore-wrap g.rest { cursor:pointer; }
+  #lSIn [id^="ln"] { cursor:pointer; }
   .lp-progress .fill { height:100%; width:0%; background:linear-gradient(90deg,#a78bfa,#7c3aed); border-radius:8px; }
   .lp-time { font-size:12px; color:#888; font-weight:700; white-space:nowrap; }
   .view-toggle { display:flex; gap:6px; }
-  .vt-btn { border:2px solid #a78bfa; background:#fff; color:#7c3aed; border-radius:10px; padding:7px 12px; font-weight:800; cursor:pointer; font-size:13px; }
+  .vt-btn { border:2px solid #a78bfa; background:#fff; color:#7c3aed; border-radius:10px; padding:11px 15px; font-weight:800; cursor:pointer; font-size:15px; }
   .vt-btn.sel { background:#7c3aed; color:#fff; }
   .lp-stage { background:rgba(255,255,255,.95); border-radius:18px; padding:14px; box-shadow:0 4px 14px rgba(0,0,0,.12); }
   .fall-canvas { display:block; width:100%; height:300px; background:linear-gradient(180deg,#1e1b4b,#312e81); border-radius:12px; }
@@ -383,7 +388,7 @@
   .vscore-wrap, .vpage { user-select:none; -webkit-user-select:none; }
   @media (max-width:640px){
     .comp-card { min-width:80px; padding:8px 4px; } .comp-name { font-size:11px; }
-    .lp-title { font-size:17px; } .lp-btn { padding:9px 14px; font-size:14px; }
+    .lp-title { font-size:17px; } .lp-btn { padding:13px 18px; font-size:15px; }
     .fall-canvas { height:240px; } .lscore-wrap { height:260px; } .vscore-wrap { height:320px; }
     .lscore-wrap .playhead { left:90px; }
   }
@@ -800,7 +805,7 @@ function noteOn(m,fromMidi){
   const el=keyEl(m); if(el) el.classList.add('pressed');
   if(game) game.onNote(m);
 }
-function noteOff(m){ activeNotes.delete(m); const el=keyEl(m); if(el) el.classList.remove('pressed'); }
+function noteOff(m){ activeNotes.delete(m); const el=keyEl(m); if(el) el.classList.remove('pressed'); if(game && game.onNoteOff) game.onNoteOff(m); }
 function clearHints(){ document.querySelectorAll('.hintkey').forEach(e=>e.classList.remove('hintkey')); }
 function showHintKeys(ms){ clearHints(); if(!hintOn) return; ms.forEach(m=>{ const el=keyEl(m); if(el) el.classList.add('hintkey'); }); }
 
@@ -1703,7 +1708,8 @@ class FallGame {
       d.textContent=nm;
       if(el.offsetWidth<22) d.style.fontSize='9px';
       this.area.appendChild(d);
-      this.slots.push({t:e.t*this.beat+3.0, m:n.m, el:d, h:hpx, done:false, hit:false});
+      const _t=e.t*this.beat+3.0, _endT=_t+hpx/this.H*this.travel;
+      this.slots.push({t:_t, m:n.m, el:d, h:hpx, done:false, hit:false, started:false, endT:_endT, hold:(_endT-_t)>0.55});
     }));
     this.total=this.slots.length; this.hits=0; this.score=0; this.combo=0; this.maxCombo=0;
     this.t0=c.currentTime; this.playing=true;
@@ -1720,9 +1726,12 @@ class FallGame {
       const y=(now-(sl.t-this.travel))/this.travel*this.H;
       sl.el.style.transform='translateY('+(y-sl.h)+'px)';
       sl.el.classList.toggle('near', !sl.done && sl.t-now>=0 && sl.t-now<0.4);
-      if(!sl.done && now>sl.t+this.win){
+      if(!sl.done && !sl.started && now>sl.t+this.win){
         sl.done=true; sl.el.classList.add('missfx'); this.combo=0; this.updHud();
         this.fx(sl.el.offsetLeft+sl.el.offsetWidth/2, false);
+      }
+      else if(sl.started && !sl.done && now>=sl.endT){
+        sl.done=true; sl.el.classList.remove('holding'); sl.el.classList.add('hitfx');
       }
     });
     const pr=document.getElementById('fProg');
@@ -1771,15 +1780,26 @@ class FallGame {
     if(!this.playing) return;
     const now=ac().currentTime-this.t0;
     let best=null, bd=1e9;
-    this.slots.forEach(sl=>{ if(!sl.done&&sl.m===m){ const d=Math.abs(now-sl.t); if(d<bd){bd=d;best=sl;} } });
+    this.slots.forEach(sl=>{ if(!sl.done&&!sl.started&&sl.m===m){ const d=Math.abs(now-sl.t); if(d<bd){bd=d;best=sl;} } });
     if(best && bd<=this.win){
-      best.done=true; best.hit=true; best.el.classList.add('hitfx');
+      best.hit=true;
       this.hits++; this.combo++; this.maxCombo=Math.max(this.maxCombo,this.combo);
       this.score += (bd<0.13?100:70) + this.combo*2;
       this.fx(best.el.offsetLeft+best.el.offsetWidth/2, true, bd<0.13);
       if(this.combo>=10 && this.combo%10===0) this.comboBig();
       this.updHud();
+      if(best.hold){ best.started=true; best.startAt=now; best.el.classList.add('holding'); }
+      else { best.done=true; best.el.classList.add('hitfx'); }
     } else { this.combo=0; this.updHud(); }
+  }
+  onNoteOff(m){
+    if(!this.playing) return;
+    const now=ac().currentTime-this.t0;
+    const sl=this.slots.find(s=>s.started&&!s.done&&s.m===m);
+    if(!sl) return;
+    if(now >= sl.endT-0.18){ sl.done=true; sl.el.classList.remove('holding'); sl.el.classList.add('hitfx'); }
+    else { sl.done=true; sl.el.classList.remove('holding'); sl.el.classList.add('missfx'); this.combo=0; this.updHud();
+      this.fx(sl.el.offsetLeft+sl.el.offsetWidth/2, false); }
   }
   finishGame(){
     this.playing=false; cancelAnimationFrame(this.raf);
@@ -2061,7 +2081,8 @@ async function loadPieceData(i,p){
     const b64=VRV.renderToMIDI(), bin=atob(b64);
     const u8=new Uint8Array(bin.length);
     for(let k=0;k<bin.length;k++) u8[k]=bin.charCodeAt(k);
-    lv={tm:tm,pages:VRV.getPageCount(),pageSvg:{},ptr:0,lit:{},lastMs:-1,scT:0,idx:i};
+    const nt={}; for(const e of tm){ if(e.on) for(const id of e.on){ if(!(id in nt)) nt[id]=e.tstamp/1000; } }
+    lv={tm:tm,pages:VRV.getPageCount(),pageSvg:{},ptr:0,lit:{},lastMs:-1,scT:0,idx:i,noteTime:nt};
     return parseMidi(u8.buffer);
   }catch(e){ lv=null; }
   const r2=await fetch('midi/'+p.f);
@@ -2094,7 +2115,7 @@ function openPiece(i){
    '<div class="lp-controls">'+
    '<button class="lp-btn" id="lPlayBtn" onclick="lToggle()">▶ 재생</button>'+
    '<button class="lp-btn small" onclick="lStop()">⏹ 처음부터</button>'+
-   '<div class="lp-progress" id="lProg" onclick="lSeek(event)"><div class="fill" id="lFill"></div></div>'+
+   '<div class="lp-progress" id="lProg" onpointerdown="lProgDown(event)" title="드래그하거나 눌러서 원하는 위치로 이동"><div class="fill" id="lFill"></div><div class="knob" id="lKnob"></div></div>'+
    '<span class="lp-time" id="lTime">0:00 / '+fmtT(p.s)+'</span>'+
    '<div class="view-toggle">'+
    '<button class="vt-btn'+(lview==='score'?' sel':'')+'" id="vtS" onclick="lSetView(\'score\')">🎼 악보</button>'+
@@ -2127,7 +2148,7 @@ function lBuildStage(){
   } else if(lv && lv.idx===curL){
     st.innerHTML='<div class="vscore-wrap" id="vSW"></div>'+
       '<div style="font-size:11px;color:#999;margin-top:6px">🎼 원본 악보 · 빨간 음표가 지금 연주되는 위치예요 (자동으로 따라가요)</div>';
-    const sw=document.getElementById('vSW');
+    const sw=document.getElementById('vSW'); sw.onclick=lScoreClick;
     for(let pn=1;pn<=lv.pages;pn++){
       const d=document.createElement('div'); d.className='vpage'; d.id='vpg'+pn;
       d.style.minHeight='140px'; sw.appendChild(d);
@@ -2139,7 +2160,7 @@ function lBuildStage(){
     lv.ptr=0; lv.lastMs=-1; lvUnlightAll();
     lfall=null;
   } else {
-    st.innerHTML='<div class="lscore-wrap" id="lSW"><div class="playhead"></div><div id="lSIn">'+buildLScore(lplayer.notes,lplayer.dur,lplayer.flat)+'</div></div>'+
+    st.innerHTML='<div class="lscore-wrap" id="lSW"><div class="playhead"></div><div id="lSIn" onclick="lStripClick(event)">'+buildLScore(lplayer.notes,lplayer.dur,lplayer.flat)+'</div></div>'+
       '<div style="font-size:11px;color:#999;margin-top:6px">🟢 초록 = 오른손 · 🔵 파랑 = 왼손 · 빨간 세로선이 지금 연주되는 위치예요 (간이 악보)</div>';
     lfall=null; this._lit=[];
   }
@@ -2152,7 +2173,8 @@ function lLoop(){
     try{
     const now=lplayer.now();
     const f=document.getElementById('lFill'), tm=document.getElementById('lTime');
-    if(f) f.style.width=(lplayer.dur? now/lplayer.dur*100:0)+'%';
+    const _p=(lplayer.dur? now/lplayer.dur*100:0); const _kb=document.getElementById('lKnob');
+    if(f) f.style.width=_p+'%'; if(_kb) _kb.style.left=_p+'%';
     if(tm) tm.textContent=fmtT(now)+' / '+fmtT(lplayer.dur);
     if(lview==='fall'&&lfall) lfall.frame();
     else if(lv && lv.idx===curL){
@@ -2206,9 +2228,37 @@ function lToggle(){
 }
 function lStop(){ if(lplayer){ lplayer.pause(); lplayer.offset=0; }
   const bt=document.getElementById('lPlayBtn'); if(bt) bt.textContent='▶ 재생'; }
-function lSeek(ev){ if(!lLoaded) return;
-  const r=document.getElementById('lProg').getBoundingClientRect();
-  lplayer.seek((ev.clientX-r.left)/r.width*lplayer.dur); }
+let lDragging=false, lWasPlaying=false;
+function lProgPos(ev){ const r=document.getElementById('lProg').getBoundingClientRect();
+  const x=(ev.touches&&ev.touches[0]?ev.touches[0].clientX:ev.clientX);
+  return Math.max(0,Math.min(1,(x-r.left)/r.width))*lplayer.dur; }
+function lProgRender(){ if(!lplayer) return; const now=lplayer.offset;
+  const f=document.getElementById('lFill'), tm=document.getElementById('lTime');
+  const kb=document.getElementById('lKnob'); const pct=(lplayer.dur?now/lplayer.dur*100:0);
+  if(f) f.style.width=pct+'%'; if(kb) kb.style.left=pct+'%';
+  if(tm) tm.textContent=fmtT(now)+' / '+fmtT(lplayer.dur); }
+function lResyncScore(){ if(lv){ lvUnlightAll(); lv.ptr=0; lv.lastMs=-1; } }
+function lSeekTo(t,play){ if(!lLoaded) return;
+  const wasPlaying=lplayer.playing; lplayer.pause();
+  lplayer.offset=Math.max(0,Math.min(t,lplayer.dur)); lResyncScore(); lProgRender();
+  const go=(play===undefined)?wasPlaying:play;
+  if(go){ lplayer.start(); const bt=document.getElementById('lPlayBtn'); if(bt) bt.textContent='⏸ 일시정지'; } }
+function lProgDown(ev){ if(!lLoaded) return; ev.preventDefault();
+  lDragging=true; lWasPlaying=lplayer.playing; if(lplayer.playing) lplayer.pause();
+  lplayer.offset=lProgPos(ev); lResyncScore(); lProgRender();
+  window.addEventListener('pointermove',lProgMove); window.addEventListener('pointerup',lProgUp);
+  window.addEventListener('pointercancel',lProgUp); }
+function lProgMove(ev){ if(!lDragging) return; ev.preventDefault();
+  lplayer.offset=lProgPos(ev); lProgRender(); }
+function lProgUp(){ if(!lDragging) return; lDragging=false;
+  window.removeEventListener('pointermove',lProgMove); window.removeEventListener('pointerup',lProgUp);
+  window.removeEventListener('pointercancel',lProgUp);
+  lResyncScore(); if(lWasPlaying) lplayer.start(); lProgRender(); }
+function lSeek(ev){ if(!lLoaded) return; lSeekTo(lProgPos(ev)); }
+function lScoreClick(ev){ if(!lv||!lLoaded||!lv.noteTime) return; let el=ev.target;
+  for(let k=0;k<6&&el;k++){ if(el.id && (el.id in lv.noteTime)){ lSeekTo(lv.noteTime[el.id],true); return; } el=el.parentNode; } }
+function lStripClick(ev){ if(!lLoaded) return; let el=ev.target;
+  for(let k=0;k<4&&el;k++){ if(el.id && /^ln\d+$/.test(el.id) && lplayer.notes[+el.id.slice(2)]){ lSeekTo(lplayer.notes[+el.id.slice(2)].t,true); return; } el=el.parentNode; } }
 function lSpeed(v,btn){ if(lplayer) lplayer.setSpeed(v);
   document.querySelectorAll('.spd').forEach(b=>b.classList.toggle('sel', +b.dataset.v===v)); }
 function lSetView(v){ if(lview===v) return; lview=v;
