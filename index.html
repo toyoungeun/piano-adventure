@@ -1468,27 +1468,20 @@ function fingerFn(toks,hand){
 }
 function hasFingering(s){ return songTrackStrs(s).some(([h,str])=>fingerFn(getToks(str),h)); }
 function computeFingering(toks,hand){
-  const top=k=> hand==='L'? Math.min(...k.ms): Math.max(...k.ms);
-  const seq=[]; toks.forEach(k=>{ if(k.ms) seq.push({k:k, di:diaIdx(top(k)), d:k.dur||1}); });
+  const R = hand!=='L';
+  const top=k=> R? Math.max(...k.ms): Math.min(...k.ms);
+  const seq=[]; toks.forEach(k=>{ if(k.ms) seq.push({k:k, di:diaIdx(top(k))}); });
   if(!seq.length) return;
-  // weighted histogram of scale positions, find the best fixed 5-finger "home" window
-  const w={}; let tot=0;
-  seq.forEach(s=>{ w[s.di]=(w[s.di]||0)+s.d; tot+=s.d; });
-  const dis=seq.map(s=>s.di), lo=Math.min(...dis), hi=Math.max(...dis);
-  let bw=lo, bwt=-1;
-  for(let st=lo-1; st<=hi; st++){ let wt=0; for(const d in w){ const dd=+d; if(dd>=st&&dd<=st+4) wt+=w[d]; } if(wt>bwt){ bwt=wt; bw=st; } }
-  if(bwt/tot>=0.72){
-    // mostly one hand position: keep it, reach out with thumb(low)/pinky(high)
-    seq.forEach(s=>{ const di=s.di; let f;
-      if(di<bw) f = hand==='R'?1:5;
-      else if(di>bw+4) f = hand==='R'?5:1;
-      else { const p=di-bw; f = hand==='R'? p+1 : 5-p; }
-      s.k._f=f; });
-  } else {
-    // spread out (scales/arpeggios): 5-window that follows the line
-    let a=null;
-    seq.forEach(s=>{ const di=s.di; if(a===null) a=di-2; if(di>a+4||di<a) a=di-2;
-      const p=Math.max(0,Math.min(4,di-a)); s.k._f = hand==='R'? p+1 : 5-p; });
+  // 멜로디를 5음(다이어토닉) 안에 들어오는 최대 구간으로 나눠, 각 구간에서 1~5로 매김
+  let i=0;
+  while(i<seq.length){
+    let lo=seq[i].di, hi=seq[i].di, j=i;
+    while(j+1<seq.length){
+      const d=seq[j+1].di, nlo=Math.min(lo,d), nhi=Math.max(hi,d);
+      if(nhi-nlo<=4){ lo=nlo; hi=nhi; j++; } else break;
+    }
+    for(let k2=i;k2<=j;k2++){ const pos=seq[k2].di-lo; seq[k2].k._f = R? pos+1 : 5-pos; }
+    i=j+1;
   }
 }
 function renderScore(s){
@@ -2349,7 +2342,7 @@ function listenHTML(){
       '<div class="song-title">'+s.t+'</div>'+
       '<div class="lp-len">'+fmtT(s.s)+'</div></div>';
   });
-  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v5(편곡 5곡 제거)</div>';
+  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v6(손가락 번호 개선)</div>';
   return html;
 }
 
