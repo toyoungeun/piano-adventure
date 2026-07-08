@@ -2248,11 +2248,11 @@ function lLoop(){
           if(!el && VRV){ try{ const pg=VRV.getPageWithElement(id); if(pg){ lvEnsure(pg); el=document.getElementById(id); } }catch(err){} }
           if(el){ el.style.fill='#ef4444'; lv.lit[id]=el;
             const sw=document.getElementById('vSW');
-            if(sw && lplayer.playing && performance.now()-lv.scT>450){
+            if(sw && lplayer.playing && performance.now()-lv.scT>400){
               const er=el.getBoundingClientRect(), wr=sw.getBoundingClientRect();
-              const rel=(er.top+er.bottom)/2 - wr.top;
-              if(rel < wr.height*0.30 || rel > wr.height*0.52){
-                sw.scrollTo({top: sw.scrollTop + rel - wr.height*0.40, behavior:'smooth'});
+              const rel=er.top - wr.top;
+              if(rel < -4 || rel > wr.height*0.74){   /* 줄이 바뀔 때만: 한 줄분 지나면 한 번 이동 */
+                sw.scrollTo({top: sw.scrollTop + rel - wr.height*0.16, behavior:'smooth'});
                 lv.scT=performance.now();
               }
             }
