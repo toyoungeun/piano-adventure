@@ -741,7 +741,11 @@ function clickSound(at, accent){ const c=ac(),o=c.createOscillator(),g=c.createG
 
 /* ================= MIDI ================= */
 let midiOn=false, midiOut=null;
-function pianoOn(m,vel=96){ if(midiOut){ try{ midiOut.send([0x90,m,vel]); return true; }catch(e){} } return false; }
+let MIDIVOL=0.55;                       // 전자피아노로 보낼 세기 비율 (피아노 볼륨을 존중해 과하지 않게)
+function mvel(v){ return Math.max(1, Math.min(127, Math.round(v*MIDIVOL))); }
+let autoNext=null, lAutoPlay=false;
+function clearAutoNext(){ if(autoNext){ clearTimeout(autoNext); autoNext=null; } }
+function pianoOn(m,vel=96){ if(midiOut){ try{ midiOut.send([0x90,m,mvel(vel)]); return true; }catch(e){} } return false; }
 function pianoOff(m){ if(midiOut){ try{ midiOut.send([0x80,m,0]); }catch(e){} } }
 function pianoAllOff(){ if(midiOut){ try{ midiOut.send([0xB0,123,0]); }catch(e){} } }
 function initMidi(byClick){
@@ -856,6 +860,7 @@ function setBar(p){ document.getElementById('hudBar').style.width=(p*100)+'%'; }
 function setMiss(n){ document.getElementById('hudMiss').textContent = n>0 ? '실수 '+n : ''; }
 function shakeCard(){ const q=$q(); q.classList.remove('shake'); void q.offsetWidth; q.classList.add('shake'); }
 function showScreen(id){
+  clearAutoNext();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
@@ -924,7 +929,8 @@ function finishLevel(stars, msg){
     '<div class="result-msg">'+(msg||'')+'</div>'+
     (hasNext?'<button class="btn-next" onclick="startLevel('+(curLevel+1)+')">다음 레벨 ▶</button>':'<div style="font-size:20px;margin-bottom:10px">🏆 모든 레벨 완료! 넌 진짜 피아니스트야!</div>')+
     '<button class="btn-retry" onclick="startLevel('+curLevel+')">다시 하기 🔄</button>'+
-    '<button class="btn-home" onclick="goHome()">🏠</button>';
+    '<button class="btn-home" onclick="goHome()">🏠</button>'+
+    (hasNext?'<div style="font-size:12px;color:#888;margin-top:10px">⏱️ 3초 후 다음 레벨로 넘어가요 · 버튼을 누르면 멈춰요</div>':'');
   if(stars===3){ sfxFanfare();
     for(let k=0;k<26;k++){ const c=document.createElement('div'); c.className='confetti';
       c.textContent=['🎉','⭐','🎵','✨','🎶'][k%5];
@@ -932,6 +938,7 @@ function finishLevel(stars, msg){
       card.appendChild(c); } }
   else sfxGood();
   showScreen('resultScreen');
+  if(hasNext) autoNext=setTimeout(()=>startLevel(curLevel+1), 3000);
 }
 
 /* ---------- 건반 찾기 ---------- */
@@ -1255,7 +1262,7 @@ class EarQuizGame {
    ================================================================ */
 /* ---------- 멜로디 사전 (음:박자, 기본 1박, +는 동시에) ---------- */
 const TUNES = {
-plane:"e4 d4 c4 d4 e4 e4 e4:2 d4 d4 d4:2 e4 g4 g4:2 e4 d4 c4 d4 e4 e4 e4 d4 d4 e4 d4 c4:4",
+plane:"e4 d4 c4 d4 e4 e4 e4:2 d4 d4 d4:2 e4 g4 g4:2 e4 d4 c4 d4 e4 e4 e4:2 d4 d4 e4 d4 c4:4",
 school:"g4 g4 a4 a4 g4 g4 e4:2 g4 g4 e4 e4 d4:2 g4 g4 a4 a4 g4 g4 e4:2 g4 e4 d4 e4 c4:4",
 star:"c4 c4 g4 g4 a4 a4 g4:2 f4 f4 e4 e4 d4 d4 c4:2 g4 g4 f4 f4 e4 e4 d4:2 g4 g4 f4 f4 e4 e4 d4:2 c4 c4 g4 g4 a4 a4 g4:2 f4 f4 e4 e4 d4 d4 c4:2",
 nabi:"g4 e4 e4:2 f4 d4 d4:2 c4 d4 e4 f4 g4 g4 g4:2 g4 e4 e4 e4 f4 d4 d4 d4 c4 e4 g4 g4 e4 e4 e4:2 d4 d4 d4 d4 d4 e4 f4:2 e4 e4 e4 e4 e4 f4 g4:2 g4 e4 e4:2 f4 d4 d4:2 c4 e4 g4 g4 e4 e4 c4:2",
@@ -1356,35 +1363,35 @@ L:[
 ],
 B:[
 {t:'작은별 + 온음표 베이스',d:1,bpm:85,r:'$star',l:'c3:4 c3:4 f3:4 c3:4 f3:4 c3:4 c3:4 g3:4 c3:4 g3:4 c3:4 g3:2 c3:2',tip:'첫 양손 곡! 왼손은 4박에 한 번만 누르면 돼요. 오른손 멜로디에 집중!'},
-{t:'비행기 + 온음표 베이스',d:1,bpm:90,r:'$plane',l:'c3:4 c3:4 g3:4 c3:4 c3:4 c3:4 g3:4 c3:4',tip:'왼손은 도와 솔 두 개뿐! 마디가 바뀔 때만 왼손을 움직여요.'},
-{t:'학교종 + 2분음표 베이스',d:2,bpm:90,r:'$school',l:'c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 g3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 g3:2 c3:2',tip:'왼손이 2박마다 쿵-쿵. 오른손 두 음에 왼손 한 번!'},
-{t:'안녕 + 베이스',d:2,bpm:90,r:'$hello',l:'c3:4 c3:4 c3:2 g3:2 c3:2 g3:2 c3:4 c3:4 g3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:4',tip:'돌림노래에 베이스를 더하면 진짜 합주 느낌!'},
+{t:'비행기 + 온음표 베이스',d:1,bpm:90,r:'$plane',l:'c3:2 g3:2 e3:2 b3:2 d3:2 a3:2 e3:2 b3:2 c3:2 g3:2 e3:2 b3:2 d3:2 a3:2 c3:2 g3:2',tip:'왼손은 도와 솔 두 개뿐! 마디가 바뀔 때만 왼손을 움직여요.'},
+{t:'학교종 + 2분음표 베이스',d:2,bpm:90,r:'$school',l:'g3:2 d4:2 e3:2 b3:2 e3:2 b3:2 g3:2 d4:2 g3:2 d4:2 e3:2 b3:2 c3:2 g3:2 c3:2',tip:'왼손이 2박마다 쿵-쿵. 오른손 두 음에 왼손 한 번!'},
+{t:'안녕 + 베이스',d:2,bpm:90,r:'$hello',l:'c3:2 g3:2 c3:2 g3:2 e3:2 b3:2 e3:2 b3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2',tip:'돌림노래에 베이스를 더하면 진짜 합주 느낌!'},
 {t:'나비야 + 베이스',d:2,bpm:95,r:'$nabi',l:'c3:4 g3:4 c3:4 c3:4 c3:4 g3:4 c3:4 c3:4 g3:4 g3:4 c3:4 c3:4 c3:4 g3:4 c3:4 c3:4',tip:'왼손 온음표를 누른 채로 오른손 멜로디! 두 손이 따로 움직이는 첫 연습이에요.'},
-{t:'곰 세 마리 + 베이스',d:2,bpm:90,r:'$bear',l:'c3:4 c3:4 g3:4 c3:4 c3:4 g3:2 c3:2',tip:'노래 부르면서 양손으로! 가족 앞 공연용 1순위 곡.'},
+{t:'곰 세 마리 + 베이스',d:2,bpm:90,r:'$bear',l:'c3:2 g3:2 c3:2 g3:2 e3:2 b3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:1',tip:'노래 부르면서 양손으로! 가족 앞 공연용 1순위 곡.'},
 {t:'환희의 송가 + 베이스',d:2,bpm:95,r:'$ode',l:'c3:4 c3:4 g3:4 c3:4 c3:4 c3:4 g3:4 c3:4 g3:4 c3:4 g3:4 c3:4 c3:4 c3:4 g3:4 c3:4',tip:'베토벤 교향곡 9번을 내 손으로! 왼손은 도·솔만 기억하세요.'},
 {t:'런던 다리 + 쿵쿵 베이스',d:3,bpm:95,r:'$london',l:'c3:2 g3:2 c3:2 g3:2 g3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 g3:2 g3:2 g3:2 c3:2',tip:'오른손 점음표+왼손 2분음표. 두 손의 리듬이 달라도 당황하지 않기!'},
-{t:'산토끼 + 베이스',d:3,bpm:95,r:'$rabbit',l:'c3:4 c3:4 f3:4 c3:4 c3:4 g3:4 c3:4 f3:4 c3:4 g3:4 c3:4',tip:'파(F) 베이스가 처음 등장! 도-파-솔 세 위치를 왼손이 순간이동해요.'},
+{t:'산토끼 + 베이스',d:3,bpm:95,r:'$rabbit',l:'c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:1',tip:'파(F) 베이스가 처음 등장! 도-파-솔 세 위치를 왼손이 순간이동해요.'},
 {t:'옛날 옛적에 + 베이스',d:3,bpm:95,r:'$oldmac',l:'c3:2 c3:2 f3:2 c3:2 c3:2 g3:2 c3:2 c3:2 c3:2 c3:2 f3:2 c3:2 c3:2 g3:2 c3:2 c3:2',tip:'이-아이-이-아이-오! 신나게 부르면서 치면 박자가 저절로 맞아요.'},
-{t:'얀키 두들 + 베이스',d:3,bpm:100,r:'$yankee',l:'c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 g3:2 c3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 f3:2 c3:2 f3:2 c3:2 g3:2 g3:2 f3:2 c3:2 f3:2 c3:2 g3:2 c3:2 g3:2 c3:2',tip:'행진곡이니 왼손이 북소리라고 상상하세요. 쿵! 쿵!'},
+{t:'얀키 두들 + 베이스',d:3,bpm:100,r:'$yankee',l:'c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 g3:2 d4:2 c3:2 g3:2 a3:2 e4:2 a3:2 e4:2 g3:2 d4:2 g3:2 d4:2 c3:2 g3:2 c3:2 g3:2 c3:2',tip:'행진곡이니 왼손이 북소리라고 상상하세요. 쿵! 쿵!'},
 {t:'징글벨 + 베이스',d:3,bpm:105,r:'$jingle',l:'c3:4 c3:4 c3:4 c3:4 f3:4 c3:4 d3:4 g3:4 c3:4 c3:4 c3:4 c3:4 f3:4 c3:4 g3:4 c3:4',tip:'크리스마스에 트리 앞에서 연주하면 산타가 감동할 곡!'},
-{t:'오! 수잔나 + 베이스',d:3,bpm:100,r:'$susanna',l:'c3:4 g3:4 c3:4 g3:4 c3:4 g3:4 g3:4 c3:4 f3:4 f3:4 c3:4 g3:4 c3:4 g3:4 c3:4 c3:4',tip:'왼손 온음표 위에 오른손 8분음표가 달려요. 왼손은 느긋하게, 오른손은 신나게!'},
-{t:'퐁당퐁당 + 베이스',d:3,bpm:95,r:'$pong',l:'c3:4 c3:4 g3:4 c3:4 g3:4 c3:2 g3:2 c3:4',tip:'물수제비 뜨는 기분으로 통통!'},
-{t:'아리랑 + 베이스',d:4,bpm:88,ts:3,r:'$arirang',l:'c3:3 c3:3 f3:3 c3:3 c3:3 g3:3 c3:3 c3:3 c3:3 c3:3 f3:3 c3:3 g3:3 g3:3 c3:3 c3:3',tip:'3박자 아리랑을 양손으로. 왼손은 마디 첫 박에 한 번씩 잔잔하게.'},
+{t:'오! 수잔나 + 베이스',d:3,bpm:100,r:'$susanna',l:'c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 d3:2 a3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 f3:2 c4:2 g3:2 d4:2 c3:2 g3:2 c3:2 g3:2 e3:2 b3:2 c3:2 g3:2 c3:2 g3:2 c3:2',tip:'왼손 온음표 위에 오른손 8분음표가 달려요. 왼손은 느긋하게, 오른손은 신나게!'},
+{t:'퐁당퐁당 + 베이스',d:3,bpm:95,r:'$pong',l:'c3:2 g3:2 c3:2 g3:2 e3:2 b3:2 c3:2 g3:2 e3:2 b3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2',tip:'물수제비 뜨는 기분으로 통통!'},
+{t:'아리랑 + 베이스',d:4,bpm:88,ts:3,r:'$arirang',l:'e3:1 b3:1 b3:1 a3:1 e4:1 e4:1 c3:1 g3:1 g3:1 a3:1 e4:1 e4:1 g3:1 d4:1 d4:1 e3:1 b3:1 b3:1 c3:1 g3:1 g3:1 d3:1 a3:1 a3:1 c3:1 g3:1 g3:1 e3:1 b3:1 b3:1 a3:1 e4:1 e4:1 c3:1 g3:1 g3:1 c3:1 g3:1 g3:1 g3:1 d4:1 d4:1 e3:1 b3:1 b3:1 c3:1 g3:1 g3:1 d3:1 a3:1 a3:1 c3:1 g3:1 g3:1 c3:1',tip:'3박자 아리랑을 양손으로. 왼손은 마디 첫 박에 한 번씩 잔잔하게.'},
 {t:'고요한 밤 + 베이스',d:4,bpm:85,ts:3,r:'$silent',l:'c3:3 c3:3 c3:3 c3:3 g3:3 g3:3 c3:3 c3:3 f3:3 f3:3 c3:3 c3:3 f3:3 f3:3 c3:3 c3:3 g3:3 g3:3 c3:3 g3:3 c3:3 c3:3',tip:'조용하고 부드럽게(피아노, p). 건반을 어루만지듯이 치세요.'},
-{t:'성자의 행진 + 베이스',d:4,bpm:105,r:'$saints',l:'c3:4 c3:4 c3:4 c3:4 c3:4 c3:4 g3:4 g3:4 c3:4 c3:2 f3:2 f3:4 c3:4 c3:4 g3:4 c3:4',tip:'재즈 밴드의 리더가 된 기분으로! 왼손이 밴드의 베이스 주자예요.'},
-{t:'어메이징 그레이스 + 베이스',d:4,bpm:85,ts:3,r:'$amazing',l:'c3:3 c3:3 f3:3 c3:3 c3:3 c3:3 g3:3 g3:3 c3:3 c3:3 f3:3 c3:3 c3:3 g3:3 c3:3 c3:3',tip:'감동적인 곡이니 서두르지 말고 한 음 한 음 정성껏.'},
-{t:'스와니강 + 베이스',d:4,bpm:85,r:'$swanee',l:'c3:4 g3:4 c3:4 f3:2 c3:2 c3:4 g3:4 c3:4 g3:2 c3:2 c3:4 g3:4 c3:4 f3:2 c3:2 c3:4',tip:'강물이 흐르듯 부드럽게 이어 치기(레가토)가 목표!'},
-{t:'생일 축하 노래 + 베이스',d:4,bpm:90,ts:3,r:'$birthday',l:'c3:3 g3:3 g3:3 c3:3 c3:3 f3:3 c3:2 g3:1 c3:3',tip:'양손 버전 생일 축하! 촛불 앞에서 연주하는 상상을 하며 연습해요.'},
-{t:'캉캉 + 베이스',d:4,bpm:115,r:'$cancan',l:'c3 g3 c3 g3 c3 g3 c3 g3 c3 g3 c3 g3 c3 g3 c3:2 c3:2',tip:'왼손 쿵-짝이 무용수의 발차기! 빠르지만 왼손은 단순해요.'},
+{t:'성자의 행진 + 베이스',d:4,bpm:105,r:'$saints',l:'c3:2 g3:2 c3:2 g3:2 e3:2 b3:2 c3:2 g3:2 c3:2 g3:2 d3:2 a3:2 d3:2 a3:2 c3:2 g3:2 e3:2 b3:2 c3:2 g3:2 c3:2 g3:2',tip:'재즈 밴드의 리더가 된 기분으로! 왼손이 밴드의 베이스 주자예요.'},
+{t:'어메이징 그레이스 + 베이스',d:4,bpm:85,ts:3,r:'$amazing',l:'c3:1 g3:1 g3:1 e3:1 b3:1 b3:1 c3:1 g3:1 g3:1 c3:1 g3:1 g3:1 e3:1 b3:1 b3:1 c3:1 g3:1 g3:1 c3:1 g3:1 g3:1 c3:1 g3:1 g3:1 c3:1 g3:1 g3:1 e3:1 b3:1 b3:1 c3:1 g3:1 g3:1 c3:2',tip:'감동적인 곡이니 서두르지 말고 한 음 한 음 정성껏.'},
+{t:'스와니강 + 베이스',d:4,bpm:85,r:'$swanee',l:'c3:2 g3:2 d3:2 a3:2 a3:2 e4:2 c3:2 g3:2 d3:2 a3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 a3:2 e4:2 c3:3',tip:'강물이 흐르듯 부드럽게 이어 치기(레가토)가 목표!'},
+{t:'생일 축하 노래 + 베이스',d:4,bpm:90,ts:3,r:'$birthday',l:'g3:1 d4:1 d4:1 g3:1 d4:1 d4:1 g3:1 d4:1 d4:1 c3:1 g3:1 g3:1 e3:1 b3:1 b3:1 a3:1 e4:1 e4:1 f3:1 c4:1 c4:1 c3:1 g3:1 g3:1 c3:1',tip:'양손 버전 생일 축하! 촛불 앞에서 연주하는 상상을 하며 연습해요.'},
+{t:'캉캉 + 베이스',d:4,bpm:115,r:'$cancan',l:'c3:2 g3:2 d3:2 a3:2 d3:2 a3:2 c3:2 g3:2 c3:2 g3:2 c3:1',tip:'왼손 쿵-짝이 무용수의 발차기! 빠르지만 왼손은 단순해요.'},
 {t:'미뉴에트 + 베이스',d:4,bpm:95,ts:3,r:'$minuet',l:'c3:3 c3:3 f3:3 c3:3 f3:3 c3:3 g3:3 c3:3',tip:'바흐 시대의 우아한 춤. 허리를 펴고 궁정 음악가처럼!'},
 {t:'캐논 (양손)',d:5,bpm:88,r:'$canon',l:'c3:2 g2:2 a2:2 e3:2 f3:2 c3:2 f3:2 g2:2 c3:2 g2:2 a2:2 e3:2 f3:2 c3:2 f3:2 g2:2 c3:4',tip:'유명한 캐논 베이스 위에 멜로디를! 왼손 연습곡 21번을 먼저 깨고 오면 쉬워요.'},
-{t:'엘리제를 위하여 (양손)',d:5,bpm:95,ts:3,key:'가단조',r:'$elise',l:'r:3 a2:1 e3:1 a3:1 r:3 e3:1 g#3:1 b3:1 r:3 a2:1 e3:1 a3:1 r:3 e3:1 g#3:1 b3:1 a2:3',tip:'오른손이 쉬는 사이 왼손이 화음을 펼쳐요. 두 손의 릴레이!'},
+{t:'엘리제를 위하여 (양손)',d:5,bpm:95,ts:3,key:'가단조',r:'$elise',l:'r:4 a2:1.5 a2:0.5 e3:0.5 a3:0.5 e2:1.5 e2:0.5 g#3:0.5 b3:0.5 a2:0.5 e3:0.5 a3:0.5 r:4.5 a2:1.5 a2:0.5 e3:0.5 a3:0.5 e2:1.5 e2:0.5 g#3:0.5 b3:0.5 a2:2.5',tip:'오른손이 쉬는 사이 왼손이 화음을 펼쳐요. 두 손의 릴레이!'},
 {t:'젓가락 행진곡 (양손)',d:5,bpm:105,ts:3,r:'g4 g4 g4 g4 g4 g4 g4 g4 g4 g4 g4 g4 b4 b4 b4 b4 b4 b4 c5 c5 c5 c5 g4 g4 c5:3',l:'f3 f3 f3 f3 f3 f3 e3 e3 e3 e3 e3 e3 d3 d3 d3 d3 d3 d3 c3 c3 c3 c3 e3 e3 c3:3',tip:'원래 두 사람이 치던 곡을 혼자 양손으로! 두 손이 똑같은 리듬이라 생각보다 쉬워요.'},
 {t:'터키 행진곡 (양손)',d:5,bpm:105,key:'가단조',r:'$turkish',l:'a2:2 a2:2 a2:2 a2:2 e3:2 e3:2 a2:2 a2:2 a2:2 e3:2 a2:2 a2:2 a2:4',tip:'왼손은 라만 반복! 오른손 멜로디가 어려우니 오른손 연습곡 27번 먼저!'},
-{t:'봄 (비발디, 양손)',d:5,bpm:105,r:'$spring',l:'c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 c3:2',tip:'오케스트라가 된 기분으로! 왼손은 첼로, 오른손은 바이올린.'},
-{t:'우편마차 갤럽 (양손)',d:5,bpm:115,r:'$postal',l:'c3 g3 c3 g3 c3 g3 c3 g3 f3 c4 d3 g3 c3 g3 c3 g3 c3 g3 c3:2',tip:'다그닥 다그닥! 왼손이 말발굽 소리를 내요.'},
+{t:'봄 (비발디, 양손)',d:5,bpm:105,r:'$spring',l:'c3:2 g3:2 c3:2 g3:2 e3:2 b3:2 d3:2 a3:2 c3:2 g3:2 c3:2 g3:2 c3:1',tip:'오케스트라가 된 기분으로! 왼손은 첼로, 오른손은 바이올린.'},
+{t:'우편마차 갤럽 (양손)',d:5,bpm:115,r:'$postal',l:'c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2',tip:'다그닥 다그닥! 왼손이 말발굽 소리를 내요.'},
 {t:'양손 스케일 함께',d:5,bpm:100,r:'c4:0.5 d4:0.5 e4:0.5 f4:0.5 g4:0.5 a4:0.5 b4:0.5 c5:0.5 c5:0.5 b4:0.5 a4:0.5 g4:0.5 f4:0.5 e4:0.5 d4:0.5 c4:0.5 c4:0.5 e4:0.5 g4:0.5 c5:0.5 g4:0.5 e4:0.5 c4:1 c4:2',l:'c3:0.5 d3:0.5 e3:0.5 f3:0.5 g3:0.5 a3:0.5 b3:0.5 c4:0.5 c4:0.5 b3:0.5 a3:0.5 g3:0.5 f3:0.5 e3:0.5 d3:0.5 c3:0.5 c3:0.5 e3:0.5 g3:0.5 c4:0.5 g3:0.5 e3:0.5 c3:1 c3:2',tip:'두 손이 한 옥타브 간격으로 똑같이 움직여요. 체르니 30의 필수 기술!'},
-{t:'체르니 양손 도전',d:5,bpm:110,r:'$czR',l:'c3:2 c3:2 g3:2 g3:2 c3:2 g3:2 c3:2 c3:2 f3:2 f3:2 g3:2 g3:2 c3:2 c3+g3:4',tip:'마지막 관문! 이 곡을 3별로 깨면 진짜 체르니 30을 시작할 준비 완료!'}
+{t:'체르니 양손 도전',d:5,bpm:110,r:'$czR',l:'c3:2 g3:2 g3:2 d4:2 c3:2 g3:2 c3:2 g3:2 d3:2 a3:2 c3:2 g3:2 c3:2',tip:'마지막 관문! 이 곡을 3별로 깨면 진짜 체르니 30을 시작할 준비 완료!'}
 ]
 };
 
@@ -1446,12 +1453,31 @@ function fingerFn(toks,hand){
   return m => hand==='R' ? diaIdx(m)-lo+1 : 5-(diaIdx(m)-lo);
 }
 function hasFingering(s){ return songTrackStrs(s).some(([h,str])=>fingerFn(getToks(str),h)); }
+function computeFingering(toks,hand){
+  const all=[]; toks.forEach(k=>{ if(k.ms) k.ms.forEach(m=>all.push(diaIdx(m))); });
+  if(!all.length) return;
+  const lo=Math.min(...all), hi=Math.max(...all);
+  const top=k=> hand==='L'? Math.min(...k.ms): Math.max(...k.ms);
+  if(hi-lo<=4){ // fits one 5-finger position
+    toks.forEach(k=>{ if(k.ms){ const d=diaIdx(top(k)); k._f = hand==='R'? d-lo+1 : 5-(d-lo); } });
+    return;
+  }
+  // wider range: 5-note window that follows the melody (thumb-under / hand shift)
+  let anchor=null;
+  toks.forEach(k=>{ if(!k.ms) return; const di=diaIdx(top(k));
+    if(anchor===null) anchor=di-2;
+    if(di>anchor+4 || di<anchor) anchor=di-2;
+    const pos=Math.max(0,Math.min(4,di-anchor));
+    k._f = hand==='R'? pos+1 : 5-pos;
+  });
+}
 function renderScore(s){
   const ts=s.ts||4, beatsPerLine=ts*4, W=780, HEAD=28;
   const tracks=songTrackStrs(s).map(([hand,str])=>{
     const toks=getToks(str);
     return { hand, clef: hand==='L'?'bass':'treble', toks, ff:fingerFn(toks,hand) };
   });
+  tracks.forEach(tr=>computeFingering(tr.toks,tr.hand));
   let total=0;
   tracks.forEach(tr=>{ let t=0; tr.toks.forEach(k=>{k.t=t; t+=k.dur;}); total=Math.max(total,t); });
   const ev=makeEvents(s), evIdx={};
@@ -1472,9 +1498,8 @@ function renderScore(s){
       svg+= tr.clef==='treble'
         ? smuflAt('treble',15,top+3*gap,gap)
         : smuflAt('bass',15,top+gap,gap);
+      svg+='<text x="14" y="'+(top-6)+'" font-size="11" font-weight="800" fill="'+(tr.hand==='R'?'#16a34a':'#2563eb')+'">'+(tr.hand==='R'?'오른손':'왼손')+'</text>';
       if(li===0){
-        /* 손 표시 + 박자표 */
-        svg+='<text x="14" y="'+(top-6)+'" font-size="11" font-weight="800" fill="'+(tr.hand==='R'?'#16a34a':'#2563eb')+'">'+(tr.hand==='R'?'오른손':'왼손')+'</text>';
         svg+='<text x="60" y="'+(top+gap+7)+'" font-size="21" font-weight="900" fill="#333">'+ts+'</text>';
         svg+='<text x="60" y="'+(top+3*gap+7)+'" font-size="21" font-weight="900" fill="#333">4</text>';
       }
@@ -1504,7 +1529,7 @@ function renderScore(s){
             if(k.dur<0.99) svg+='<path d="M '+sx+' '+(y+(up?-25:25))+' q 7 '+(up?7:-7)+' 4 13" fill="none" stroke-width="1.3"/>';
           }
           if([0.75,1.5,3].some(v=>Math.abs(k.dur-v)<0.01)) svg+='<circle cx="'+(x+9)+'" cy="'+y+'" r="1.7" stroke="none"/>';
-          if(tr.ff) svg+='<text x="'+(x-12)+'" y="'+(y+4)+'" font-size="10.5" font-weight="900" fill="#7c3aed" stroke="none">'+tr.ff(mm)+'</text>';
+          if(k._f!=null && mm===(tr.hand==='L'?Math.min(...k.ms):Math.max(...k.ms))) svg+='<text x="'+(x-13)+'" y="'+(y+4)+'" font-size="11" font-weight="900" fill="#7c3aed" stroke="none">'+k._f+'</text>';
         });
         svg+='</g>';
       });
@@ -1620,7 +1645,8 @@ function finishChallenge(stars,msg){
     '<button class="btn-next" onclick="startChallenge(\''+f+'\')">다시 도전 🔄</button>'+
     '<button class="btn-retry" onclick="startChallenge(\''+(f==='b'?'g':'b')+'\')">'+(f==='b'?'🎮 게임 모드':'📖 기본 모드')+'</button>'+
     '<button class="btn-home" onclick="openSong(\''+s.cat+'\','+s.idx+')">곡 정보</button>'+
-    '<button class="btn-home" onclick="homeTab=\'challenge\';goHome()">목록</button>';
+    '<button class="btn-home" onclick="homeTab=\'challenge\';goHome()">목록</button>'+
+    ((CH[s.cat]&&CH[s.cat][s.idx+1])?'<div style="font-size:12px;color:#888;margin-top:10px">⏱️ 3초 후 다음 곡으로 넘어가요 · 버튼을 누르면 멈춰요</div>':'');
   if(stars===3){ sfxFanfare();
     for(let k=0;k<26;k++){ const c=document.createElement('div'); c.className='confetti';
       c.textContent=['🎉','⭐','🎵','✨','🎶'][k%5];
@@ -1628,15 +1654,14 @@ function finishChallenge(stars,msg){
       card.appendChild(c); } }
   else if(stars>0) sfxGood();
   showScreen('resultScreen');
+  if(CH[s.cat] && CH[s.cat][s.idx+1]) autoNext=setTimeout(()=>{ openSong(s.cat, s.idx+1); startChallenge(f); }, 3000);
 }
 
 /* ---------- 기본 모드: 악보 보고 연습 ---------- */
 class BasicPlay {
   constructor(s){ this.s=s; this.ev=makeEvents(s); this.i=0; this.miss=0; this.got={}; }
   begin(){
-    const fingerNote = hasFingering(this.s)
-      ? '<div style="font-size:12px;color:#7c3aed;font-weight:700;margin-top:6px">음표 왼쪽 보라 숫자 = 손가락 번호 (1 엄지 · 2 검지 · 3 중지 · 4 약지 · 5 새끼)</div>'
-      : '<div style="font-size:12px;color:#999;margin-top:6px">음역이 넓은 곡이라 손을 옮겨가며 쳐요 — 브리핑의 손 위치 안내를 참고하세요</div>';
+    const fingerNote = '<div style="font-size:12px;color:#7c3aed;font-weight:700;margin-top:6px">음표 옆 보라 숫자 = 손가락 번호(1 엄지·2 검지·3 중지·4 약지·5 새끼) · 줄 왼쪽 <span style="color:#16a34a">오른손</span>/<span style="color:#2563eb">왼손</span> = 치는 손 (숫자가 6·7… 처럼 이어지면 그 자리에서 손을 옮겨요)</div>';
     $q().innerHTML='<div class="q-instruction">🔴 빨간 음표를 연주하세요 — 내 속도로 천천히, 틀려도 괜찮아요!</div>'+
       '<div class="score-wrap" id="scoreWrap">'+renderScore(this.s)+'</div>'+fingerNote+'<div class="feedback" id="fb"></div>';
     this.paint();
@@ -1647,7 +1672,9 @@ class BasicPlay {
       g.setAttribute('color', ei<this.i?'#16a34a': ei===this.i?'#dc2626':'#222');
     });
     const cur=document.querySelector('#scoreWrap .sn[data-ev="'+this.i+'"]');
-    if(cur&&cur.scrollIntoView) cur.scrollIntoView({block:'center',behavior:'smooth'});
+    const sw=document.getElementById('scoreWrap');
+    if(cur&&sw){ const cr=cur.getBoundingClientRect(), wr=sw.getBoundingClientRect();
+      sw.scrollTo({top: sw.scrollTop+(cr.top-wr.top)-wr.height*0.38, behavior:'smooth'}); }
     const e=this.ev[this.i]; if(e) showHintKeys(e.notes.map(n=>n.m));
     setBar(this.i/this.ev.length);
   }
@@ -1953,7 +1980,7 @@ class LPlayer{
       const durS=n.d/this.speed;
       if(midiOut){
         const base=performance.now()+(when-ac().currentTime)*1000;
-        try{ midiOut.send([0x90,n.m,Math.min(110,n.v+8)],base);
+        try{ midiOut.send([0x90,n.m,mvel(n.v)],base);
              midiOut.send([0x80,n.m,0],base+Math.max(120,durS*1000)); }catch(e){}
       } else {
         const s=playSampleAt(n.m,when,durS,(n.v/255)*0.65+0.10);
@@ -2137,9 +2164,11 @@ function openPiece(i){
   loadPieceData(i,p).then(data=>{
      if(curL!==i) return;
      lplayer=new LPlayer(); lplayer.setData(data); lplayer.flat=estimateFlat(lplayer.notes);
-     lplayer.onend=()=>{ const bt=document.getElementById('lPlayBtn'); if(bt) bt.textContent='▶ 재생'; };
+     lplayer.onend=()=>{ const bt=document.getElementById('lPlayBtn'); if(bt) bt.textContent='▶ 재생';
+       if(curL+1<LSONGS.length){ lAutoPlay=true; autoNext=setTimeout(()=>openPiece(curL+1), 3000); } };
      if(!midiOut){ const set=new Set(); lplayer.notes.forEach(n=>set.add(n.m)); set.forEach(m=>loadSample(m)); }
      lLoaded=true; lBuildStage(); lLoop();
+     if(lAutoPlay){ lAutoPlay=false; lplayer.start(); const bt=document.getElementById('lPlayBtn'); if(bt) bt.textContent='⏸ 일시정지'; }
    })
    .catch(()=>{ const el=document.getElementById('lLoading');
      if(el) el.innerHTML='😢 음원을 불러오지 못했어요.<br><span style="font-size:12px">인터넷 연결을 확인하거나, 배포된 웹 주소에서 열어주세요.</span>'; });
@@ -2274,7 +2303,7 @@ function lSetView(v){ if(lview===v) return; lview=v;
   const a=document.getElementById('vtS'), b=document.getElementById('vtF');
   if(a) a.classList.toggle('sel',v==='score'); if(b) b.classList.toggle('sel',v==='fall');
   lBuildStage(); }
-function stopListen(){ if(lplayer){ lplayer.pause(); } cancelAnimationFrame(lRaf); curL=-1; }
+function stopListen(){ clearAutoNext(); if(lplayer){ lplayer.pause(); } cancelAnimationFrame(lRaf); curL=-1; }
 function listenHTML(){
   let html='<div class="comp-grid">';
   LDATA.forEach(c=>{
