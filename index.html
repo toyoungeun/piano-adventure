@@ -2268,9 +2268,9 @@ function lLoop(){
       let guard=0;
       while(lv.ptr<lv.tm.length && lv.tm[lv.ptr].tstamp<=ms && guard++<800){
         const e=lv.tm[lv.ptr++];
-        (e.off||[]).forEach(id=>{ const el=lv.lit[id]; if(el){ el.style.fill=''; delete lv.lit[id]; } });
+        (e.off||[]).forEach(id=>{ id=id.replace(/-rend\d+$/,''); const el=lv.lit[id]; if(el){ el.style.fill=''; delete lv.lit[id]; } });
         if(ms-e.tstamp>1500) continue;
-        (e.on||[]).forEach(id=>{
+        (e.on||[]).forEach(id=>{ id=id.replace(/-rend\d+$/,'');
           let el=document.getElementById(id);
           if(!el && VRV){ try{ const pg=VRV.getPageWithElement(id); if(pg){ lvEnsure(pg); el=document.getElementById(id); } }catch(err){} }
           if(el){ el.style.fill='#ef4444'; lv.lit[id]=el;
@@ -2374,7 +2374,7 @@ function listenHTML(){
       '<div class="song-title">'+s.t+'</div>'+
       '<div class="lp-len">'+fmtT(s.du)+'</div></div>';
   });
-  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v13(프렐류드 큰보표 2단 분리)</div>';
+  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v14(되돌이표 반복 하이라이트 수정)</div>';
   return html;
 }
 
