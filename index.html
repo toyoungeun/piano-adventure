@@ -28,7 +28,7 @@
     color:#fff; cursor:pointer; transition:.2s;
   }
   .midi-pill.on { background:#2ecc71; border-color:#2ecc71; }
-  .screen { display:none; max-width:900px; margin:0 auto; padding:0 16px 40px; }
+  .screen { display:none; max-width:1500px; margin:0 auto; padding:0 20px 40px; }
   .screen.active { display:block; }
 
   /* ---------- HOME ---------- */
@@ -278,6 +278,17 @@
   .topbar h1 { white-space:nowrap; }
   .midi-pill { white-space:nowrap; }
   .score-wrap svg { width:100%; height:auto; min-width:560px; }
+  @media (min-width:1100px){
+    .fall-area { height:440px; }
+    .kb { height:240px; }
+    .score-wrap { max-height:480px; }
+    .vscore-wrap { height:620px; }
+    .lscore-wrap { height:440px; }
+    .fall-note { font-size:17px; }
+    .wk .klabel { font-size:16px; }
+    .kb.dense .klabel { font-size:13px; }
+    .lp-title { font-size:24px; }
+  }
   @media (max-width:640px){
     .topbar { padding:10px 10px; }
     .topbar h1 { font-size:17px; }
@@ -1286,9 +1297,9 @@ amazing:"c4 e4:2 g4:0.5 e4:0.5 g4:2 e4 c4:2 c4 e4:2 g4:0.5 e4:0.5 g4:2 e4 c5:2 c
 cancan:"e4:0.5 e4:0.5 e4 d4:0.5 c4:0.5 c4 d4:0.5 e4:0.5 f4:0.5 g4:0.5 a4:0.5 g4:0.5 f4:0.5 e4:0.5 d4:2 e4:0.5 e4:0.5 e4 d4:0.5 c4:0.5 c4 d4:0.5 e4:0.5 f4:0.5 e4:0.5 d4:0.5 e4:0.5 c4:2 c4:2",
 chopsticks:"f4+g4 f4+g4 f4+g4 f4+g4 f4+g4 f4+g4 e4+g4 e4+g4 e4+g4 e4+g4 e4+g4 e4+g4 d4+b4 d4+b4 d4+b4 d4+b4 d4+b4 d4+b4 c4+c5 c4+c5 c4+c5 c4+c5 e4+g4 e4+g4 c4+c5:3",
 minuet:"g4 c4:0.5 d4:0.5 e4:0.5 f4:0.5 g4 c4 c4 a4 f4:0.5 g4:0.5 a4:0.5 b4:0.5 c5 c4 c4 f4 g4:0.5 f4:0.5 e4:0.5 d4:0.5 e4 f4:0.5 e4:0.5 d4:0.5 c4:0.5 d4 e4:0.5 d4:0.5 c4:0.5 b3:0.5 c4:3",
-canon:"e4:2 d4:2 c4:2 b3:2 a3:2 g3:2 a3:2 b3:2 e4 g4 d4 f4 c4 e4 b3 d4 a3 c4 g3 b3 a3 c4 b3 d4 c4:4",
-elise:"e5:0.5 d#5:0.5 e5:0.5 d#5:0.5 e5:0.5 b4:0.5 d5:0.5 c5:0.5 a4:1.5 c4:0.5 e4:0.5 a4:0.5 b4:1.5 e4:0.5 g#4:0.5 b4:0.5 c5:1.5 e5:0.5 e5:0.5 d#5:0.5 e5:0.5 d#5:0.5 e5:0.5 b4:0.5 d5:0.5 c5:0.5 a4:1.5 c4:0.5 e4:0.5 a4:0.5 b4:1.5 e4:0.5 c5:0.5 b4:0.5 a4:2.5",
-turkish:"b4:0.5 a4:0.5 g#4:0.5 a4:0.5 c5:2 d5:0.5 c5:0.5 b4:0.5 c5:0.5 e5:2 f5:0.5 e5:0.5 d#5:0.5 e5:0.5 b4:0.5 a4:0.5 g#4:0.5 a4:0.5 b4:0.5 a4:0.5 g#4:0.5 a4:0.5 c5:2 a4 c5 b4:0.5 a4:0.5 g#4 a4 b4:0.5 a4:0.5 g#4 a4 c5:2 c5:2",
+canon:"e4:2 d4:2 c4:2 b3:2 c4:2 g3:2 a3:2 b3:2 e5 d5 c5 b4 a4 g4 a4 b4 c5 b4 a4 g4 f4 e4 f4 d4 c4:4",
+elise:"e5:0.5 d#5:0.5 e5:0.5 d#5:0.5 e5:0.5 b4:0.5 d5:0.5 c5:0.5 a4:1.5 c4:0.5 e4:0.5 a4:0.5 b4:1.5 e4:0.5 g#4:0.5 b4:0.5 c5:1.5 e4:0.5 e5:0.5 d#5:0.5 e5:0.5 d#5:0.5 e5:0.5 b4:0.5 d5:0.5 c5:0.5 a4:1.5 c4:0.5 e4:0.5 a4:0.5 b4:1.5 e4:0.5 c5:0.5 b4:0.5 a4:2.5",
+turkish:"b4:0.5 a4:0.5 g#4:0.5 a4:0.5 c5:2 d5:0.5 c5:0.5 b4:0.5 c5:0.5 e5:2 f5:0.5 e5:0.5 d#5:0.5 e5:0.5 b5:0.5 a5:0.5 g#5:0.5 a5:0.5 b5:0.5 a5:0.5 g#5:0.5 a5:0.5 c6:2 a5 c6 g5:0.5 a5:0.5 b5 a5 g5:0.5 a5:0.5 g5 a5 b5:2 a5:2",
 spring:"c4:0.5 e4:0.5 e4:0.5 e4:0.5 d4:0.5 c4:0.5 g4:1.5 g4:0.5 f4:0.5 e4:0.5 e4:0.5 e4:0.5 d4:0.5 c4:0.5 g4:1.5 g4:0.5 f4:0.5 e4:0.5 f4:0.5 g4:0.5 f4:0.5 e4:0.5 d4:2 c4:0.5 e4:0.5 e4:0.5 e4:0.5 d4:0.5 c4:0.5 g4:1.5 g4:0.5 f4:0.5 e4:0.5 d4:0.5 e4:0.5 d4:0.5 c4:0.5 c4:2",
 postal:"c4:0.5 c4:0.5 g4:0.5 g4:0.5 a4:0.5 a4:0.5 g4 f4:0.5 f4:0.5 e4:0.5 e4:0.5 d4:0.5 d4:0.5 c4 g4:0.5 g4:0.5 e4:0.5 c4:0.5 g4:0.5 g4:0.5 e4:0.5 c4:0.5 a4:0.5 a4:0.5 f4:0.5 d4:0.5 g4:0.5 g4:0.5 e4:0.5 c4:0.5 c4:0.5 d4:0.5 e4:0.5 f4:0.5 g4:0.5 a4:0.5 b4:0.5 c5:0.5 c5:2",
 czR:"c4:0.5 d4:0.5 e4:0.5 f4:0.5 g4:0.5 a4:0.5 b4:0.5 c5:0.5 d5:0.5 c5:0.5 b4:0.5 a4:0.5 g4:0.5 f4:0.5 e4:0.5 d4:0.5 c4:0.5 e4:0.5 g4:0.5 c5:0.5 b4:0.5 g4:0.5 f4:0.5 d4:0.5 c4:0.5 d4:0.5 e4:0.5 f4:0.5 g4:0.5 e4:0.5 c4:0.5 e4:0.5 d4:0.5 f4:0.5 a4:0.5 d5:0.5 c5:0.5 a4:0.5 f4:0.5 a4:0.5 g4:0.5 b4:0.5 d5:0.5 b4:0.5 c5:2 c4:2"
@@ -1385,7 +1396,7 @@ B:[
 {t:'캉캉 + 베이스',d:4,bpm:115,r:'$cancan',l:'c3:2 g3:2 d3:2 a3:2 d3:2 a3:2 c3:2 g3:2 c3:2 g3:2 c3:1',tip:'왼손 쿵-짝이 무용수의 발차기! 빠르지만 왼손은 단순해요.'},
 {t:'미뉴에트 + 베이스',d:4,bpm:95,ts:3,r:'$minuet',l:'c3:3 c3:3 f3:3 c3:3 f3:3 c3:3 g3:3 c3:3',tip:'바흐 시대의 우아한 춤. 허리를 펴고 궁정 음악가처럼!'},
 {t:'캐논 (양손)',d:5,bpm:88,r:'$canon',l:'c3:2 g2:2 a2:2 e3:2 f3:2 c3:2 f3:2 g2:2 c3:2 g2:2 a2:2 e3:2 f3:2 c3:2 f3:2 g2:2 c3:4',tip:'유명한 캐논 베이스 위에 멜로디를! 왼손 연습곡 21번을 먼저 깨고 오면 쉬워요.'},
-{t:'엘리제를 위하여 (양손)',d:5,bpm:95,ts:3,key:'가단조',r:'$elise',l:'r:4 a2:1.5 a2:0.5 e3:0.5 a3:0.5 e2:1.5 e2:0.5 g#3:0.5 b3:0.5 a2:0.5 e3:0.5 a3:0.5 r:4.5 a2:1.5 a2:0.5 e3:0.5 a3:0.5 e2:1.5 e2:0.5 g#3:0.5 b3:0.5 a2:2.5',tip:'오른손이 쉬는 사이 왼손이 화음을 펼쳐요. 두 손의 릴레이!'},
+{t:'엘리제를 위하여 (양손)',d:5,bpm:95,ts:3,key:'가단조',r:'$elise',l:'r:4 a2:0.5 e3:0.5 a3:0.5 r:1.5 e2:0.5 e3:0.5 g#3:0.5 r:1.5 a2:0.5 e3:0.5 a3:0.5 r:4.5 a2:0.5 e3:0.5 a3:0.5 r:1.5 e2:0.5 e3:0.5 g#3:0.5 r:1.5 a2:0.5 e3:0.5 a3:0.5 r:1',tip:'오른손이 쉬는 사이 왼손이 화음을 펼쳐요. 두 손의 릴레이!'},
 {t:'젓가락 행진곡 (양손)',d:5,bpm:105,ts:3,r:'g4 g4 g4 g4 g4 g4 g4 g4 g4 g4 g4 g4 b4 b4 b4 b4 b4 b4 c5 c5 c5 c5 g4 g4 c5:3',l:'f3 f3 f3 f3 f3 f3 e3 e3 e3 e3 e3 e3 d3 d3 d3 d3 d3 d3 c3 c3 c3 c3 e3 e3 c3:3',tip:'원래 두 사람이 치던 곡을 혼자 양손으로! 두 손이 똑같은 리듬이라 생각보다 쉬워요.'},
 {t:'터키 행진곡 (양손)',d:5,bpm:105,key:'가단조',r:'$turkish',l:'a2:2 a2:2 a2:2 a2:2 e3:2 e3:2 a2:2 a2:2 a2:2 e3:2 a2:2 a2:2 a2:4',tip:'왼손은 라만 반복! 오른손 멜로디가 어려우니 오른손 연습곡 27번 먼저!'},
 {t:'봄 (비발디, 양손)',d:5,bpm:105,r:'$spring',l:'c3:2 g3:2 c3:2 g3:2 e3:2 b3:2 d3:2 a3:2 c3:2 g3:2 c3:2 g3:2 c3:1',tip:'오케스트라가 된 기분으로! 왼손은 첼로, 오른손은 바이올린.'},
@@ -1454,22 +1465,28 @@ function fingerFn(toks,hand){
 }
 function hasFingering(s){ return songTrackStrs(s).some(([h,str])=>fingerFn(getToks(str),h)); }
 function computeFingering(toks,hand){
-  const all=[]; toks.forEach(k=>{ if(k.ms) k.ms.forEach(m=>all.push(diaIdx(m))); });
-  if(!all.length) return;
-  const lo=Math.min(...all), hi=Math.max(...all);
   const top=k=> hand==='L'? Math.min(...k.ms): Math.max(...k.ms);
-  if(hi-lo<=4){ // fits one 5-finger position
-    toks.forEach(k=>{ if(k.ms){ const d=diaIdx(top(k)); k._f = hand==='R'? d-lo+1 : 5-(d-lo); } });
-    return;
+  const seq=[]; toks.forEach(k=>{ if(k.ms) seq.push({k:k, di:diaIdx(top(k)), d:k.dur||1}); });
+  if(!seq.length) return;
+  // weighted histogram of scale positions, find the best fixed 5-finger "home" window
+  const w={}; let tot=0;
+  seq.forEach(s=>{ w[s.di]=(w[s.di]||0)+s.d; tot+=s.d; });
+  const dis=seq.map(s=>s.di), lo=Math.min(...dis), hi=Math.max(...dis);
+  let bw=lo, bwt=-1;
+  for(let st=lo-1; st<=hi; st++){ let wt=0; for(const d in w){ const dd=+d; if(dd>=st&&dd<=st+4) wt+=w[d]; } if(wt>bwt){ bwt=wt; bw=st; } }
+  if(bwt/tot>=0.72){
+    // mostly one hand position: keep it, reach out with thumb(low)/pinky(high)
+    seq.forEach(s=>{ const di=s.di; let f;
+      if(di<bw) f = hand==='R'?1:5;
+      else if(di>bw+4) f = hand==='R'?5:1;
+      else { const p=di-bw; f = hand==='R'? p+1 : 5-p; }
+      s.k._f=f; });
+  } else {
+    // spread out (scales/arpeggios): 5-window that follows the line
+    let a=null;
+    seq.forEach(s=>{ const di=s.di; if(a===null) a=di-2; if(di>a+4||di<a) a=di-2;
+      const p=Math.max(0,Math.min(4,di-a)); s.k._f = hand==='R'? p+1 : 5-p; });
   }
-  // wider range: 5-note window that follows the melody (thumb-under / hand shift)
-  let anchor=null;
-  toks.forEach(k=>{ if(!k.ms) return; const di=diaIdx(top(k));
-    if(anchor===null) anchor=di-2;
-    if(di>anchor+4 || di<anchor) anchor=di-2;
-    const pos=Math.max(0,Math.min(4,di-anchor));
-    k._f = hand==='R'? pos+1 : 5-pos;
-  });
 }
 function renderScore(s){
   const ts=s.ts||4, beatsPerLine=ts*4, W=780, HEAD=28;
@@ -1964,10 +1981,10 @@ function playSampleAt(m,when,dur,vol){
 class LPlayer{
   constructor(){ this.notes=[]; this.dur=0; this.playing=false; this.offset=0; this.speed=1; this.sched=null; this.srcs=[]; this.idx=0; this.onend=null; }
   setData(p){ this.notes=p.notes; this.dur=p.dur; this.offset=0; }
-  now(){ return this.playing ? this.offset+(ac().currentTime-this.t0)*this.speed : this.offset; }
+  now(){ return this.playing ? this.offset+(performance.now()/1000-this.t0)*this.speed : this.offset; }
   start(){
     if(this.playing||!this.notes.length) return;
-    ac(); this.playing=true; this.t0=ac().currentTime+0.12;
+    ac(); this.playing=true; this.t0=performance.now()/1000+0.12;
     this.idx=0; while(this.idx<this.notes.length&&this.notes[this.idx].t<this.offset) this.idx++;
     this.sched=setInterval(()=>this.pump(),70); this.pump();
   }
@@ -1976,14 +1993,15 @@ class LPlayer{
     const hz=this.now()+0.4;
     while(this.idx<this.notes.length && this.notes[this.idx].t<=hz){
       const n=this.notes[this.idx++];
-      const when=this.t0+(n.t-this.offset)/this.speed;
+      const when=this.t0+(n.t-this.offset)/this.speed;   /* performance.now() seconds */
       const durS=n.d/this.speed;
       if(midiOut){
-        const base=performance.now()+(when-ac().currentTime)*1000;
+        const base=when*1000;                              /* Web MIDI timestamp domain */
         try{ midiOut.send([0x90,n.m,mvel(n.v)],base);
              midiOut.send([0x80,n.m,0],base+Math.max(120,durS*1000)); }catch(e){}
       } else {
-        const s=playSampleAt(n.m,when,durS,(n.v/255)*0.65+0.10);
+        const acWhen=ac().currentTime+(when-performance.now()/1000);
+        const s=playSampleAt(n.m,acWhen,durS,(n.v/255)*0.65+0.10);
         this.srcs.push(s); if(this.srcs.length>120) this.srcs.splice(0,40);
       }
     }
