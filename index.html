@@ -282,8 +282,8 @@
     .fall-area { height:440px; }
     .kb { height:240px; }
     .score-wrap { max-height:480px; }
-    .vscore-wrap { height:620px; }
-    .lscore-wrap { height:440px; }
+    .vscore-wrap { height:calc(100vh - 300px); min-height:540px; }
+    .lscore-wrap { height:calc(100vh - 330px); min-height:440px; }
     .fall-note { font-size:17px; }
     .wk .klabel { font-size:16px; }
     .kb.dense .klabel { font-size:13px; }
@@ -355,8 +355,8 @@
   }
 
   /* ---------- 음악감상 ---------- */
-  .comp-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
-  .comp-card { flex:1 1 100px; min-width:96px; background:rgba(255,255,255,.92); border-radius:14px;
+  .comp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; margin-bottom:14px; }
+  .comp-card { min-width:0; background:rgba(255,255,255,.92); border-radius:14px;
     padding:10px 6px; cursor:pointer; text-align:center; border:3px solid transparent; transition:.15s; }
   .comp-card:hover { transform:translateY(-2px); }
   .comp-card.sel { border-color:#fbbf24; }
@@ -1998,7 +1998,7 @@ class LPlayer{
       if(midiOut){
         const base=when*1000;                              /* Web MIDI timestamp domain */
         try{ midiOut.send([0x90,n.m,mvel(n.v)],base);
-             midiOut.send([0x80,n.m,0],base+Math.max(120,durS*1000)); }catch(e){}
+             midiOut.send([0x80,n.m,0],base+Math.max(60,durS*1000-28)); }catch(e){}
       } else {
         const acWhen=ac().currentTime+(when-performance.now()/1000);
         const s=playSampleAt(n.m,acWhen,durS,(n.v/255)*0.65+0.10);
