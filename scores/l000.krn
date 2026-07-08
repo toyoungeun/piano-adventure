@@ -12,14 +12,15 @@
 !!!YEC: Copyright (c) 1994, 2000 Center for Computer Assisted Research in the Humanities
 !!!YEM: Rights to all derivative editions reserved
 !!!YEN: United States of America
-**kern
-*k[]
-*C:
-*M4/4
-*MM112
-=1-
-*^
-*^	*
+**kern	**kern
+*clefG2	*clefF4
+*staff1	*staff2
+*k[]	*k[]
+*C:	*C:
+*M4/4	*M4/4
+*MM112	*MM112
+=1-	=1-
+*	*^
 8r	16r	2c\
 .	[8.e\	.
 16g/LL	.	.
