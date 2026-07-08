@@ -229,7 +229,7 @@
   .brief h4 { color:#7c3aed; margin:12px 0 2px; font-size:14px; }
   .brief h4:first-child { margin-top:0; }
   .brief .tag { display:inline-block; background:#ede9fe; color:#7c3aed; border-radius:8px; padding:2px 8px; font-size:12px; font-weight:700; margin:2px; }
-  .score-wrap { max-height:330px; overflow:auto; background:#fff; border-radius:12px; width:100%; }
+  .score-wrap { max-height:min(330px, calc(100dvh - 430px)); min-height:150px; overflow:auto; background:#fff; border-radius:12px; width:100%; }
   /* ---------- 게임 모드 (낙하 노트) ---------- */
   .fall-area { position:relative; height:340px; background:linear-gradient(180deg,#1e1b4b,#312e81); border-radius:14px; overflow:hidden; margin-bottom:10px; }
   .fall-note { position:absolute; border-radius:6px; color:#fff; font-size:15px; font-weight:900; text-align:center; overflow:hidden; box-shadow:0 0 6px rgba(255,255,255,.3); display:flex; align-items:flex-end; justify-content:center; padding-bottom:3px; }
@@ -283,7 +283,7 @@
   @media (min-width:1100px){
     .fall-area { height:440px; }
     .kb { height:240px; }
-    .score-wrap { max-height:480px; }
+    .score-wrap { max-height:min(520px, calc(100dvh - 430px)); }
     .vscore-wrap { height:calc(100vh - 300px); min-height:540px; }
     .lscore-wrap { height:calc(100vh - 330px); min-height:440px; }
     .fall-note { font-size:17px; }
@@ -353,7 +353,7 @@
     .result-stars { font-size:44px; }
     .result-card button { font-size:14px; padding:10px 14px; }
     .modal { padding:18px; font-size:13px; }
-    .score-wrap { max-height:260px; }
+    .score-wrap { max-height:min(260px, calc(100dvh - 400px)); }
   }
 
   /* ---------- 음악감상 ---------- */
@@ -1387,7 +1387,7 @@ B:[
 {t:'런던 다리 + 쿵쿵 베이스',d:3,bpm:95,r:'$london',l:'c3:2 g3:2 c3:2 g3:2 g3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 g3:2 g3:2 g3:2 c3:2',tip:'오른손 점음표+왼손 2분음표. 두 손의 리듬이 달라도 당황하지 않기!'},
 {t:'산토끼 + 베이스',d:3,bpm:95,r:'$rabbit',l:'c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:1',tip:'파(F) 베이스가 처음 등장! 도-파-솔 세 위치를 왼손이 순간이동해요.'},
 {t:'옛날 옛적에 + 베이스',d:3,bpm:95,r:'$oldmac',l:'c3:2 c3:2 f3:2 c3:2 c3:2 g3:2 c3:2 c3:2 c3:2 c3:2 f3:2 c3:2 c3:2 g3:2 c3:2 c3:2',tip:'이-아이-이-아이-오! 신나게 부르면서 치면 박자가 저절로 맞아요.'},
-{t:'얀키 두들 + 베이스',d:3,bpm:100,r:'$yankee',l:'c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 g3:2 d4:2 c3:2 g3:2 a3:2 e4:2 a3:2 e4:2 g3:2 d4:2 g3:2 d4:2 c3:2 g3:2 c3:2 g3:2 c3:2',tip:'행진곡이니 왼손이 북소리라고 상상하세요. 쿵! 쿵!'},
+{t:'얀키 두들 + 베이스',d:3,bpm:100,r:'$yankee+12',fg:'3 3 4 5 3 5 4 1 3 3 4 5 3 2 2 2 3 4 5 4 3 1 3 1 2 3 4 4 2 3 2 1 2 3 4 1 2 3 2 1 2 3 4 2 1 4 3 5 4 4',l:'c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 g3:2 d4:2 c3:2 g3:2 a3:2 e4:2 a3:2 e4:2 g3:2 d4:2 g3:2 d4:2 c3:2 g3:2 c3:2 g3:2 c3:2',tip:'오른손 멜로디는 왼손보다 높은 자리에서! 왼손은 북소리처럼 쿵! 쿵!'},
 {t:'징글벨 + 베이스',d:3,bpm:105,r:'$jingle',l:'c3:4 c3:4 c3:4 c3:4 f3:4 c3:4 d3:4 g3:4 c3:4 c3:4 c3:4 c3:4 f3:4 c3:4 g3:4 c3:4',tip:'크리스마스에 트리 앞에서 연주하면 산타가 감동할 곡!'},
 {t:'오! 수잔나 + 베이스',d:3,bpm:100,r:'$susanna',l:'c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 d3:2 a3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2 f3:2 c4:2 g3:2 d4:2 c3:2 g3:2 c3:2 g3:2 e3:2 b3:2 c3:2 g3:2 c3:2 g3:2 c3:2',tip:'왼손 온음표 위에 오른손 8분음표가 달려요. 왼손은 느긋하게, 오른손은 신나게!'},
 {t:'퐁당퐁당 + 베이스',d:3,bpm:95,r:'$pong',l:'c3:2 g3:2 c3:2 g3:2 e3:2 b3:2 c3:2 g3:2 e3:2 b3:2 c3:2 g3:2 c3:2 g3:2 c3:2 g3:2',tip:'물수제비 뜨는 기분으로 통통!'},
@@ -2387,7 +2387,7 @@ function listenHTML(){
       '<div class="song-title">'+s.t+'</div>'+
       '<div class="lp-len">'+fmtT(s.du)+'</div></div>';
   });
-  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v18(양손 악보 두 손 간격 자동)</div>';
+  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v19(양손 겹침·건반 잘림 수정)</div>';
   return html;
 }
 
