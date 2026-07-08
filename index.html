@@ -245,9 +245,11 @@
   .speed-btn { border:2px solid #a78bfa; background:#fff; color:#7c3aed; border-radius:10px; padding:11px 18px; font-weight:800; cursor:pointer; font-size:15px; }
   .speed-btn.sel { background:#7c3aed; color:#fff; }
   /* ---------- 나가기 버튼 & 게임모드 이펙트 ---------- */
-  .exit-btn { background:#f3f4f6; border:none; border-radius:12px; padding:9px 14px;
-    font-weight:900; color:#555; cursor:pointer; font-size:14px; white-space:nowrap; flex:none; }
+  .exit-btn { background:#f3f4f6; border:none; border-radius:12px; padding:12px 18px; min-height:44px;
+    font-weight:900; color:#555; cursor:pointer; font-size:16px; white-space:nowrap; flex:none; }
   .exit-btn:hover { background:#e5e7eb; }
+  .back-btn { background:#ede9fe; border:none; border-radius:14px; padding:12px 20px; font-size:17px; font-weight:800; color:#7c3aed; cursor:pointer; min-height:48px; box-shadow:0 2px 8px rgba(124,58,237,.18); }
+  .back-btn:active { transform:scale(.97); }
   .lane { position:absolute; top:0; bottom:0; width:1px; background:rgba(255,255,255,.08); }
   .fall-prog { position:absolute; top:0; left:0; height:4px; width:0%;
     background:linear-gradient(90deg,#4ade80,#fbbf24); z-index:5; border-radius:0 3px 3px 0; }
@@ -310,7 +312,7 @@
     .brief { font-size:13px; padding:12px; line-height:1.7; }
     .hud { flex-wrap:wrap; gap:6px 8px; padding:8px 10px; border-radius:12px; margin-bottom:10px; }
     .hud .lvname { font-size:13px; order:2; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .exit-btn { order:1; font-size:12px; padding:7px 10px; }
+    .exit-btn { order:1; font-size:14px; padding:10px 14px; }
     .miss-count { order:3; font-size:12px; }
     .progress-wrap { order:4; flex:1 1 100%; height:10px; }
     .qcard { padding:12px 10px; min-height:150px; border-radius:16px; margin-bottom:10px; }
@@ -413,6 +415,7 @@
   <div class="hud">
     <button class="exit-btn" onclick="exitPlay()">◀ 나가기</button>
     <button class="exit-btn" onclick="retryPlay()">🔄 다시</button>
+    <button class="exit-btn" id="hudSwitch" style="display:none;background:#ede9fe;color:#7c3aed" onclick="switchMode()"></button>
     <div class="lvname" id="hudName"></div>
     <div class="progress-wrap"><div class="progress-bar" id="hudBar"></div></div>
     <div class="miss-count" id="hudMiss"></div>
@@ -485,7 +488,7 @@ function smuflAt(name,ox,oy,ss,color){var g=SMUFL[name],s=ss/250;return '<g tran
 function smuflInline(name,hpx,color){var g=SMUFL[name],x=g.bb[0],y=g.bb[1],w=g.bb[2],h=g.bb[3],s=hpx/h,W=(w*s).toFixed(1);return '<svg class="msym" width="'+W+'" height="'+hpx+'" viewBox="'+x+' '+(-(y+h))+' '+w+' '+h+'" style="vertical-align:-0.18em"><path transform="scale(1,-1)" d="'+g.d+'" fill="'+(color||'currentColor')+'"/></svg>';}
 function repeatSign(side,hpx,color){color=color||'#7c3aed';var H=hpx,W=hpx*0.62,th=hpx*0.16,thin=hpx*0.06,r=hpx*0.075,y1=H*0.38,y2=H*0.62,bars,dots,dx;if(side==='L'){bars='<rect x="0" y="0" width="'+th+'" height="'+H+'"/><rect x="'+(th*1.7)+'" y="0" width="'+thin+'" height="'+H+'"/>';dx=th*2.6+thin;}else{bars='<rect x="'+(W-th)+'" y="0" width="'+th+'" height="'+H+'"/><rect x="'+(W-th*1.7-thin)+'" y="0" width="'+thin+'" height="'+H+'"/>';dx=W-th*2.6-thin;}dots='<circle cx="'+dx+'" cy="'+y1+'" r="'+r+'"/><circle cx="'+dx+'" cy="'+y2+'" r="'+r+'"/>';return '<svg class="msym" width="'+W.toFixed(1)+'" height="'+H+'" viewBox="0 0 '+W.toFixed(1)+' '+H+'" style="vertical-align:-0.15em" fill="'+color+'">'+bars+dots+'</svg>';}
 const SONGS = {
-  plane:  [64,62,60,62,64,64,64, 62,62,62, 64,67,67, 64,62,60,62,64,64,64,64, 62,62,64,62,60],
+  plane:  [64,62,60,62,64,64,64, 62,62,62, 64,67,67, 64,62,60,62,64,64,64, 62,62,64,62,60],
   school: [67,67,69,69,67,67,64, 67,67,64,64,62, 67,67,69,69,67,67,64, 67,64,62,64,60],
   nabi:   [67,64,64,65,62,62, 60,62,64,65,67,67,67, 67,64,64,64,65,62,62,62, 60,64,67,67,64,64,64],
   star:   [60,60,67,67,69,69,67, 65,65,64,64,62,62,60, 67,67,65,65,64,64,62, 67,67,65,65,64,64,62, 60,60,67,67,69,69,67, 65,65,64,64,62,62,60]
@@ -864,6 +867,10 @@ function retryPlay(){
   if(curSong&&chMode){ const m=chMode; chMode=null; startChallenge(m); }
   else if(curLevel>=0) startLevel(curLevel);
 }
+function switchMode(){ if(!curSong||!chMode) return;
+  if(game&&game.stop)game.stop(); game=null; clearHints();
+  document.getElementById('qCard').style.display='';
+  const other = chMode==='b'?'g':'b'; chMode=null; startChallenge(other); }
 function exitPlay(){ if(game&&game.stop)game.stop(); game=null; clearHints();
   document.getElementById('qCard').style.display='';
   if(curSong&&chMode){ chMode=null; openSong(curSong.cat,curSong.idx); } else goHome(); }
@@ -879,6 +886,7 @@ function startLevel(i){
   if(!unlocked(i)) return;
   curLevel=i; const L=LEVELS[i];
   document.getElementById('hudName').textContent=(i+1)+'. '+L.name;
+  { const sw=document.getElementById('hudSwitch'); if(sw) sw.style.display='none'; }
   setBar(0); setMiss(0);
   // 건반 범위
   let notes=[];
@@ -1247,7 +1255,7 @@ class EarQuizGame {
    ================================================================ */
 /* ---------- 멜로디 사전 (음:박자, 기본 1박, +는 동시에) ---------- */
 const TUNES = {
-plane:"e4 d4 c4 d4 e4 e4 e4:2 d4 d4 d4:2 e4 g4 g4:2 e4 d4 c4 d4 e4 e4 e4 e4 d4 d4 e4 d4 c4:4",
+plane:"e4 d4 c4 d4 e4 e4 e4:2 d4 d4 d4:2 e4 g4 g4:2 e4 d4 c4 d4 e4 e4 e4 d4 d4 e4 d4 c4:4",
 school:"g4 g4 a4 a4 g4 g4 e4:2 g4 g4 e4 e4 d4:2 g4 g4 a4 a4 g4 g4 e4:2 g4 e4 d4 e4 c4:4",
 star:"c4 c4 g4 g4 a4 a4 g4:2 f4 f4 e4 e4 d4 d4 c4:2 g4 g4 f4 f4 e4 e4 d4:2 g4 g4 f4 f4 e4 e4 d4:2 c4 c4 g4 g4 a4 a4 g4:2 f4 f4 e4 e4 d4 d4 c4:2",
 nabi:"g4 e4 e4:2 f4 d4 d4:2 c4 d4 e4 f4 g4 g4 g4:2 g4 e4 e4 e4 f4 d4 d4 d4 c4 e4 g4 g4 e4 e4 e4:2 d4 d4 d4 d4 d4 e4 f4:2 e4 e4 e4 e4 e4 f4 g4:2 g4 e4 e4:2 f4 d4 d4:2 c4 e4 g4 g4 e4 e4 c4:2",
@@ -1272,8 +1280,8 @@ cancan:"e4:0.5 e4:0.5 e4 d4:0.5 c4:0.5 c4 d4:0.5 e4:0.5 f4:0.5 g4:0.5 a4:0.5 g4:
 chopsticks:"f4+g4 f4+g4 f4+g4 f4+g4 f4+g4 f4+g4 e4+g4 e4+g4 e4+g4 e4+g4 e4+g4 e4+g4 d4+b4 d4+b4 d4+b4 d4+b4 d4+b4 d4+b4 c4+c5 c4+c5 c4+c5 c4+c5 e4+g4 e4+g4 c4+c5:3",
 minuet:"g4 c4:0.5 d4:0.5 e4:0.5 f4:0.5 g4 c4 c4 a4 f4:0.5 g4:0.5 a4:0.5 b4:0.5 c5 c4 c4 f4 g4:0.5 f4:0.5 e4:0.5 d4:0.5 e4 f4:0.5 e4:0.5 d4:0.5 c4:0.5 d4 e4:0.5 d4:0.5 c4:0.5 b3:0.5 c4:3",
 canon:"e4:2 d4:2 c4:2 b3:2 a3:2 g3:2 a3:2 b3:2 e4 g4 d4 f4 c4 e4 b3 d4 a3 c4 g3 b3 a3 c4 b3 d4 c4:4",
-elise:"e4:0.5 d#4:0.5 e4:0.5 d#4:0.5 e4:0.5 b3:0.5 d4:0.5 c4:0.5 a3:1.5 c4:0.5 e4:0.5 a4:0.5 b4:1.5 e4:0.5 g#4:0.5 b4:0.5 c5:1.5 e4:0.5 e4:0.5 d#4:0.5 e4:0.5 d#4:0.5 e4:0.5 b3:0.5 d4:0.5 c4:0.5 a3:1.5 c4:0.5 e4:0.5 a4:0.5 b4:1.5 e4:0.5 c5:0.5 b4:0.5 a4:2.5",
-turkish:"b3:0.5 a3:0.5 g#3:0.5 a3:0.5 c4:2 d4:0.5 c4:0.5 b3:0.5 c4:0.5 e4:2 f4:0.5 e4:0.5 d#4:0.5 e4:0.5 b4:0.5 a4:0.5 g#4:0.5 a4:0.5 b4:0.5 a4:0.5 g#4:0.5 a4:0.5 c5:2 a4 c5 b4:0.5 a4:0.5 g#4 a4 b4:0.5 a4:0.5 g#4 a4 c5:2 c5:2",
+elise:"e5:0.5 d#5:0.5 e5:0.5 d#5:0.5 e5:0.5 b4:0.5 d5:0.5 c5:0.5 a4:1.5 c4:0.5 e4:0.5 a4:0.5 b4:1.5 e4:0.5 g#4:0.5 b4:0.5 c5:1.5 e5:0.5 e5:0.5 d#5:0.5 e5:0.5 d#5:0.5 e5:0.5 b4:0.5 d5:0.5 c5:0.5 a4:1.5 c4:0.5 e4:0.5 a4:0.5 b4:1.5 e4:0.5 c5:0.5 b4:0.5 a4:2.5",
+turkish:"b4:0.5 a4:0.5 g#4:0.5 a4:0.5 c5:2 d5:0.5 c5:0.5 b4:0.5 c5:0.5 e5:2 f5:0.5 e5:0.5 d#5:0.5 e5:0.5 b4:0.5 a4:0.5 g#4:0.5 a4:0.5 b4:0.5 a4:0.5 g#4:0.5 a4:0.5 c5:2 a4 c5 b4:0.5 a4:0.5 g#4 a4 b4:0.5 a4:0.5 g#4 a4 c5:2 c5:2",
 spring:"c4:0.5 e4:0.5 e4:0.5 e4:0.5 d4:0.5 c4:0.5 g4:1.5 g4:0.5 f4:0.5 e4:0.5 e4:0.5 e4:0.5 d4:0.5 c4:0.5 g4:1.5 g4:0.5 f4:0.5 e4:0.5 f4:0.5 g4:0.5 f4:0.5 e4:0.5 d4:2 c4:0.5 e4:0.5 e4:0.5 e4:0.5 d4:0.5 c4:0.5 g4:1.5 g4:0.5 f4:0.5 e4:0.5 d4:0.5 e4:0.5 d4:0.5 c4:0.5 c4:2",
 postal:"c4:0.5 c4:0.5 g4:0.5 g4:0.5 a4:0.5 a4:0.5 g4 f4:0.5 f4:0.5 e4:0.5 e4:0.5 d4:0.5 d4:0.5 c4 g4:0.5 g4:0.5 e4:0.5 c4:0.5 g4:0.5 g4:0.5 e4:0.5 c4:0.5 a4:0.5 a4:0.5 f4:0.5 d4:0.5 g4:0.5 g4:0.5 e4:0.5 c4:0.5 c4:0.5 d4:0.5 e4:0.5 f4:0.5 g4:0.5 a4:0.5 b4:0.5 c5:0.5 c5:2",
 czR:"c4:0.5 d4:0.5 e4:0.5 f4:0.5 g4:0.5 a4:0.5 b4:0.5 c5:0.5 d5:0.5 c5:0.5 b4:0.5 a4:0.5 g4:0.5 f4:0.5 e4:0.5 d4:0.5 c4:0.5 e4:0.5 g4:0.5 c5:0.5 b4:0.5 g4:0.5 f4:0.5 d4:0.5 c4:0.5 d4:0.5 e4:0.5 f4:0.5 g4:0.5 e4:0.5 c4:0.5 e4:0.5 d4:0.5 f4:0.5 a4:0.5 d5:0.5 c5:0.5 a4:0.5 f4:0.5 a4:0.5 g4:0.5 b4:0.5 d5:0.5 b4:0.5 c5:2 c4:2"
@@ -1570,7 +1578,7 @@ function openSong(cat,i){
   const st=n=>n?'★'.repeat(n)+'<span style="color:#ddd">'+'★'.repeat(3-n)+'</span>':'<span style="color:#bbb">아직 도전 전</span>';
   document.getElementById('detailScreen').innerHTML=
     '<div class="detail-card">'+
-    '<button style="border:none;background:none;font-size:15px;font-weight:800;color:#7c3aed;cursor:pointer;padding:0" onclick="homeTab=\'challenge\';goHome()">◀ 곡 목록으로</button>'+
+    '<button class="back-btn" onclick="homeTab=\'challenge\';goHome()">◀ 곡 목록으로</button>'+
     '<div class="detail-title">'+s.t+'</div>'+
     '<div class="detail-meta">난이도 '+'★'.repeat(s.d)+'<span style="color:#eee">'+'★'.repeat(5-s.d)+'</span> · '+CATS[cat].emoji+' '+CATS[cat].name+'</div>'+
     '<div style="font-size:13px;color:#666;margin-bottom:6px;font-weight:700">'+(s.key||'다장조')+' · '+(s.ts||4)+'/4박자 · ♩ = '+(s.bpm||100)+' ('+tempoWord(s.bpm||100)+')</div>'+
@@ -1589,6 +1597,7 @@ function startChallenge(mode){
   const s=curSong, ev=makeEvents(s), ms=ev.flatMap(e=>e.notes.map(n=>n.m));
   buildKeyboard(Math.min(...ms), Math.max(...ms));
   document.getElementById('hudName').textContent=s.t+(mode==='b'?' · 📖 기본':' · 🎮 게임');
+  { const sw=document.getElementById('hudSwitch'); if(sw){ sw.style.display=''; sw.textContent= mode==='b'?'🎮 게임 모드로':'📖 기본 모드로'; } }
   setBar(0); setMiss(0);
   document.getElementById('qCard').style.display='';
   showScreen('gameScreen');
@@ -2108,7 +2117,7 @@ function openPiece(i){
   const p=LSONGS[i], c=LDATA.find(x=>x.id===p.c);
   document.getElementById('listenScreen').innerHTML=
    '<div class="lp-head">'+
-   '<button style="border:none;background:none;font-size:15px;font-weight:800;color:#7c3aed;cursor:pointer;padding:0" onclick="homeTab=\'listen\';goHome()">◀ 감상 목록으로</button>'+
+   '<button class="back-btn" onclick="homeTab=\'listen\';goHome()">◀ 감상 목록으로</button>'+
    '<div class="lp-title">'+p.t+'</div>'+
    '<div class="lp-sub">'+c.e+' '+c.n+' ('+c.y+') · '+fmtT(p.s)+'</div>'+
    '<div class="lp-desc">'+p.d+'</div></div>'+
