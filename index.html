@@ -76,6 +76,11 @@
     min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:center;
   }
   .qcard.shake { animation:shake .35s; }
+  /* 재생 화면: 뷰포트에 맞춰 악보(가변)+건반(고정)이 항상 함께 보이게 */
+  #gameScreen.active{ display:flex; flex-direction:column; height:calc(100dvh - 52px); box-sizing:border-box; padding-bottom:6px; }
+  #gameScreen .qcard{ flex:1 1 auto; min-height:0; overflow:hidden; justify-content:flex-start; margin-bottom:8px; padding:14px 20px; }
+  #gameScreen #scoreWrap{ flex:1 1 auto; max-height:none; min-height:110px; }
+  #gameScreen .kb-outer{ flex:0 0 auto; }
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
   .big-note-name { font-size:64px; font-weight:900; color:#7c3aed; line-height:1.1; }
   .sub-note-name { font-size:18px; color:#aaa; margin-top:4px; }
@@ -1579,7 +1584,7 @@ function renderScore(s){
           if(k.dur<4){ const up = beamY!=null ? true : dd<4, sx=x+(up?5:-5);
             const yEnd = beamY!=null ? beamY : y+(up?-25:25);
             svg+='<line x1="'+sx+'" y1="'+y+'" x2="'+sx+'" y2="'+yEnd+'" stroke-width="1.3"/>';
-            if(beamY==null && k.dur<0.99) svg+='<path d="M '+sx+' '+(y+(up?-25:25))+' q 7 '+(up?7:-7)+' 4 13" fill="none" stroke-width="1.3"/>';
+            if(beamY==null && k.dur<0.99) svg+='<path d="M '+sx+' '+(y+(up?-25:25))+' q 8 7 5 15" fill="none" stroke-width="1.6" stroke-linecap="round"/>';
           }
           if([0.75,1.5,3].some(v=>Math.abs(k.dur-v)<0.01)) svg+='<circle cx="'+(x+9)+'" cy="'+y+'" r="1.7" stroke="none"/>';
           if(k._f!=null && mm===(tr.hand==='L'?Math.min(...k.ms):Math.max(...k.ms))) svg+='<text x="'+(x-13)+'" y="'+(y+4)+'" font-size="11" font-weight="900" fill="#7c3aed" stroke="none">'+k._f+'</text>';
@@ -2387,7 +2392,7 @@ function listenHTML(){
       '<div class="song-title">'+s.t+'</div>'+
       '<div class="lp-len">'+fmtT(s.du)+'</div></div>';
   });
-  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v19(양손 겹침·건반 잘림 수정)</div>';
+  html+='</div><div style="text-align:center;font-size:10.5px;color:rgba(255,255,255,.75);margin-top:10px">악보 데이터: KernScores/craigsapp · DCMLab (CC BY-SA / BY-NC-SA) · 악보 렌더링: Verovio · 일부 곡은 자체 편곡 · 화면 v20(음표꼬리·건반 잘림 수정)</div>';
   return html;
 }
 
